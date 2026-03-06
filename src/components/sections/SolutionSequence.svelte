@@ -208,28 +208,28 @@
     matrixVisible = true;
     step = 1;
 
-    // Phase 1: Headline decodes (20% slower: 35 → 42)
+    // Phase 1: Headline decodes — slow and deliberate
     schedule(() => {
-      decodeText(c.headline, (chars) => (headlineChars = chars), 42, () => {
+      decodeText(c.headline, (chars) => (headlineChars = chars), 55, () => {
         headlineDone = true;
         // Start fading matrix once headline is resolved
         matrixFading = true;
 
-        // Phase 2: Intro text decodes (20% slower: 12 → 15)
+        // Phase 2: Intro text decodes
         schedule(() => {
           step = 2;
-          decodeText(c.intro, (chars) => (introChars = chars), 15, () => {
+          decodeText(c.intro, (chars) => (introChars = chars), 20, () => {
             introDone = true;
 
             // Phase 3: Features decode one by one
             schedule(() => {
               step = 3;
               decodeFeature(0, c);
-            }, 600);
+            }, 800);
           });
-        }, 500);
+        }, 700);
       });
-    }, 1000);
+    }, 1200);
   }
 
   function decodeFeature(idx: number, c: typeof content.en) {
@@ -241,25 +241,25 @@
     features[idx].visible = true;
     features = [...features];
 
-    // Feature title decode (20% slower: 40 → 48)
+    // Feature title decode
     decodeText(
       c.features[idx].title,
       (chars) => {
         features[idx].titleChars = chars;
         features = [...features];
       },
-      48,
+      60,
       () => {
-        // Feature desc decode (20% slower: 10 → 12)
+        // Feature desc decode
         decodeText(
           c.features[idx].desc,
           (chars) => {
             features[idx].descChars = chars;
             features = [...features];
           },
-          12,
+          16,
           () => {
-            schedule(() => decodeFeature(idx + 1, c), 400);
+            schedule(() => decodeFeature(idx + 1, c), 500);
           }
         );
       }
@@ -316,9 +316,9 @@
     </div>
   {/if}
 
-  <!-- Headline — gold accent when decoded -->
+  <!-- Headline — bold bright gold when decoded -->
   <div class="relative z-10 max-w-4xl">
-    <h2 class="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-tight min-h-[1.5em]">
+    <h2 class="font-heading text-3xl md:text-5xl lg:text-6xl font-black leading-tight min-h-[1.5em]">
       {#if headlineChars.length > 0}
         {#each headlineChars as { ch, done }}
           <span
@@ -331,10 +331,10 @@
     </h2>
   </div>
 
-  <!-- Intro paragraph — gold accent when decoded -->
+  <!-- Intro paragraph — bold gold when decoded -->
   <div class="relative z-10 max-w-3xl min-h-[3em]">
     {#if introChars.length > 0}
-      <p class="text-xl md:text-2xl leading-relaxed">
+      <p class="text-xl md:text-2xl leading-relaxed font-semibold">
         {#each introChars as { ch, done }}
           <span
             class="decode-char"
@@ -394,26 +394,28 @@
 </div>
 
 <style>
-  /* Binary/undecoded characters — dim, sits behind resolved text */
+  /* Binary/undecoded characters — barely visible background noise */
   .decode-char {
     transition: color 0.2s ease, text-shadow 0.3s ease;
   }
   .binary {
     font-family: var(--font-mono);
-    color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    color: color-mix(in srgb, var(--color-accent) 5%, transparent);
     text-shadow: none;
   }
 
-  /* Headline decodes in bright gold */
+  /* Headline decodes in bold bright gold with strong glow */
   .decoded-headline {
     color: var(--color-accent);
-    text-shadow: 0 0 30px color-mix(in srgb, var(--color-accent) 30%, transparent);
+    text-shadow:
+      0 0 40px color-mix(in srgb, var(--color-accent) 40%, transparent),
+      0 0 80px color-mix(in srgb, var(--color-accent) 15%, transparent);
   }
 
-  /* Intro decodes in slightly muted gold */
+  /* Intro decodes in bold gold */
   .decoded-intro {
-    color: color-mix(in srgb, var(--color-accent) 80%, var(--color-text));
-    text-shadow: 0 0 15px color-mix(in srgb, var(--color-accent) 15%, transparent);
+    color: var(--color-accent);
+    text-shadow: 0 0 25px color-mix(in srgb, var(--color-accent) 25%, transparent);
   }
 
   /* Feature descriptions decode in light text */
@@ -437,12 +439,12 @@
     opacity: 0;
   }
   .matrix-line {
-    color: color-mix(in srgb, var(--color-accent) 6%, transparent);
+    color: color-mix(in srgb, var(--color-accent) 3%, transparent);
     animation: matrixPulse 5s ease-in-out infinite alternate;
   }
   @keyframes matrixPulse {
-    0% { opacity: 0.4; }
-    100% { opacity: 1; }
+    0% { opacity: 0.3; }
+    100% { opacity: 0.7; }
   }
 
   /* Feature blocks */
