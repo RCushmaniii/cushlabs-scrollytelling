@@ -8,9 +8,9 @@
   let running = $state(false);
   let matrixRunning = $state(false);
   let timeouts: ReturnType<typeof setTimeout>[] = [];
-  let rafs: number[] = [];
+  let matrixRaf: number | null = null;
 
-  // Decode display states — each block is an array of { char, decoded }
+  // Decode display states
   let headlineChars = $state<{ ch: string; done: boolean }[]>([]);
   let headlineDone = $state(false);
   let introChars = $state<{ ch: string; done: boolean }[]>([]);
@@ -37,119 +37,120 @@
       headline: "The solution is scrollytelling.",
       intro: "We don't hand you a template. CushLabs builds your cinematic presentation end-to-end — narrative strategy to immersive web experience.",
       features: [
-        {
-          title: "PRESENTATION MODE",
-          desc: "One click. Scroll locks, narration plays, sections auto-advance. Your audience watches — no clicking, no fumbling.",
-        },
-        {
-          title: "BILINGUAL BY DEFAULT",
-          desc: "English and Spanish, instant toggle. Both browse and presentation mode. One site, two audiences, zero friction.",
-        },
-        {
-          title: "AI NARRATION + SOUND DESIGN",
-          desc: "Professional voiceover per section, per language. Ambient soundscapes with crossfade transitions between chapters.",
-        },
-        {
-          title: "CINEMATIC ATMOSPHERE",
-          desc: "Film grain. Parallax depth. Ambient particles. Scroll-triggered choreography. Every pixel engineered for impact.",
-        },
+        { title: "PRESENTATION MODE", desc: "One click. Scroll locks, narration plays, sections auto-advance. Your audience watches — no clicking, no fumbling." },
+        { title: "BILINGUAL BY DEFAULT", desc: "English and Spanish, instant toggle. Both browse and presentation mode. One site, two audiences, zero friction." },
+        { title: "AI NARRATION + SOUND DESIGN", desc: "Professional voiceover per section, per language. Ambient soundscapes with crossfade transitions between chapters." },
+        { title: "CINEMATIC ATMOSPHERE", desc: "Film grain. Parallax depth. Ambient particles. Scroll-triggered choreography. Every pixel engineered for impact." },
       ],
     },
     es: {
       headline: "La solucion es el scrollytelling.",
       intro: "No te entregamos una plantilla. CushLabs construye tu presentacion cinematografica de principio a fin — estrategia narrativa a experiencia web inmersiva.",
       features: [
-        {
-          title: "MODO PRESENTACION",
-          desc: "Un clic. El scroll se bloquea, la narracion se reproduce, las secciones avanzan. Tu audiencia solo mira — sin clics, sin complicaciones.",
-        },
-        {
-          title: "BILINGUE POR DEFECTO",
-          desc: "Ingles y espanol, cambio instantaneo. Modo navegacion y presentacion. Un sitio, dos audiencias, cero friccion.",
-        },
-        {
-          title: "NARRACION IA + DISENO SONORO",
-          desc: "Voz profesional por seccion, por idioma. Paisajes sonoros ambientales con transiciones crossfade entre capitulos.",
-        },
-        {
-          title: "ATMOSFERA CINEMATOGRAFICA",
-          desc: "Grano de pelicula. Profundidad parallax. Particulas ambientales. Coreografia activada por scroll. Cada pixel disenado para impactar.",
-        },
+        { title: "MODO PRESENTACION", desc: "Un clic. El scroll se bloquea, la narracion se reproduce, las secciones avanzan. Tu audiencia solo mira — sin clics, sin complicaciones." },
+        { title: "BILINGUE POR DEFECTO", desc: "Ingles y espanol, cambio instantaneo. Modo navegacion y presentacion. Un sitio, dos audiencias, cero friccion." },
+        { title: "NARRACION IA + DISENO SONORO", desc: "Voz profesional por seccion, por idioma. Paisajes sonoros ambientales con transiciones crossfade entre capitulos." },
+        { title: "ATMOSFERA CINEMATOGRAFICA", desc: "Grano de pelicula. Profundidad parallax. Particulas ambientales. Coreografia activada por scroll. Cada pixel disenado para impactar." },
       ],
     },
   };
 
-  // ── Matrix Rain (canvas-based) ──
+  // ── Matrix Rain (canvas) ──
   function startMatrixRain() {
     if (!matrixCanvas || matrixRunning) return;
     matrixRunning = true;
 
     const ctx = matrixCanvas.getContext("2d")!;
     const fontSize = 14;
-    const chars = "01";
+    const rainChars = "01";
 
+    // Size canvas to match parent element
     function resize() {
-      const rect = el.getBoundingClientRect();
-      matrixCanvas.width = rect.width;
-      matrixCanvas.height = rect.height;
+      matrixCanvas.width = el.offsetWidth;
+      matrixCanvas.height = el.offsetHeight;
     }
     resize();
 
     const columns = Math.floor(matrixCanvas.width / fontSize);
-    const drops: number[] = new Array(columns).fill(0).map(() => Math.random() * -50);
+    // Stagger initial positions so columns start at different heights
+    const drops: number[] = Array.from({ length: columns }, () => Math.random() * -40);
 
-    // Get the accent color from CSS vars
+    // Parse accent color
     const style = getComputedStyle(el);
     const accent = style.getPropertyValue("--color-accent").trim() || "#F5C542";
 
-    function draw() {
+    let lastTime = 0;
+    const frameInterval = 80; // ~12fps — slow, deliberate fall like the movie
+
+    function draw(timestamp: number) {
       if (!matrixRunning) return;
 
-      // Semi-transparent black to create trail effect
-      ctx.fillStyle = "rgba(10, 10, 10, 0.06)";
+      // Throttle to ~12fps for slow cinematic fall
+      if (timestamp - lastTime < frameInterval) {
+        matrixRaf = requestAnimationFrame(draw);
+        return;
+      }
+      lastTime = timestamp;
+
+      // Trail fade — higher = longer trails. 0.05 gives nice long tails
+      ctx.fillStyle = "rgba(10, 10, 10, 0.05)";
       ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
 
       ctx.font = `${fontSize}px monospace`;
 
       for (let i = 0; i < drops.length; i++) {
-        const char = chars[Math.floor(Math.random() * chars.length)];
+        // Only ~60% of columns active at any time for sparse look
+        if (drops[i] === -999) {
+          if (Math.random() > 0.995) drops[i] = Math.random() * -10;
+          continue;
+        }
+
+        const char = rainChars[Math.floor(Math.random() * rainChars.length)];
         const x = i * fontSize;
         const y = drops[i] * fontSize;
 
-        // Bright head character
+        // Bright head character — the "leading drop"
         ctx.fillStyle = accent;
-        ctx.globalAlpha = 0.12;
+        ctx.globalAlpha = 0.25;
         ctx.fillText(char, x, y);
 
-        // Dimmer trail
-        ctx.globalAlpha = 0.04;
-        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], x, y - fontSize);
+        // Slightly dimmer character just above (part of the trail)
+        ctx.globalAlpha = 0.12;
+        ctx.fillText(rainChars[Math.floor(Math.random() * 2)], x, y - fontSize);
+
+        ctx.globalAlpha = 0.06;
+        ctx.fillText(rainChars[Math.floor(Math.random() * 2)], x, y - fontSize * 2);
 
         // Move drop down
-        drops[i]++;
+        drops[i] += 0.6; // Slow fall speed
 
-        // Reset drop to top randomly after it passes bottom
-        if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
-          drops[i] = 0;
+        // Reset: once past bottom, either pause or restart from top
+        if (drops[i] * fontSize > matrixCanvas.height) {
+          if (Math.random() > 0.4) {
+            drops[i] = Math.random() * -20; // Restart from above viewport
+          } else {
+            drops[i] = -999; // Pause this column
+          }
         }
       }
 
       ctx.globalAlpha = 1;
-      const raf = requestAnimationFrame(draw);
-      rafs.push(raf);
+      matrixRaf = requestAnimationFrame(draw);
     }
 
-    draw();
+    matrixRaf = requestAnimationFrame(draw);
   }
 
   function stopMatrixRain() {
     matrixRunning = false;
+    if (matrixRaf !== null) {
+      cancelAnimationFrame(matrixRaf);
+      matrixRaf = null;
+    }
   }
 
   function schedule(fn: () => void, ms: number) {
-    const id = setTimeout(() => {
-      if (running) fn();
-    }, ms);
+    const id = setTimeout(() => { if (running) fn(); }, ms);
     timeouts.push(id);
     return id;
   }
@@ -158,7 +159,6 @@
     return set[Math.floor(Math.random() * set.length)];
   }
 
-  // Decode effect: binary → glitch → resolved text
   function decodeText(
     text: string,
     setter: (chars: { ch: string; done: boolean }[]) => void,
@@ -181,52 +181,37 @@
       for (let i = decoded; i < len; i++) {
         if (text[i] !== " " && !chars[i].done) {
           const dist = i - decoded;
-          if (dist < 3) {
-            chars[i] = { ch: randChar(HEX), done: false };
-          } else if (dist < 8) {
-            chars[i] = { ch: randChar(GLITCH), done: false };
-          } else {
-            chars[i] = { ch: randChar(BINARY), done: false };
-          }
+          if (dist < 3) chars[i] = { ch: randChar(HEX), done: false };
+          else if (dist < 8) chars[i] = { ch: randChar(GLITCH), done: false };
+          else chars[i] = { ch: randChar(BINARY), done: false };
           changed = true;
         }
       }
       if (changed) setter([...chars]);
-      if (decoded < len) {
-        schedule(scramble, scrambleInterval);
-      }
+      if (decoded < len) schedule(scramble, scrambleInterval);
     }
     scramble();
 
     function decodeTick() {
       if (!running || decoded >= len) {
-        for (let i = 0; i < len; i++) {
-          chars[i] = { ch: text[i], done: true };
-        }
+        for (let i = 0; i < len; i++) chars[i] = { ch: text[i], done: true };
         setter([...chars]);
         onDone?.();
         return;
       }
-
       const batch = Math.min(1 + Math.floor(Math.random() * 1.5), len - decoded);
       for (let b = 0; b < batch; b++) {
-        if (decoded < len) {
-          chars[decoded] = { ch: text[decoded], done: true };
-          decoded++;
-        }
+        if (decoded < len) { chars[decoded] = { ch: text[decoded], done: true }; decoded++; }
       }
       setter([...chars]);
       schedule(decodeTick, speed);
     }
-
     schedule(decodeTick, speed * 4);
   }
 
   function reset() {
     timeouts.forEach(clearTimeout);
-    rafs.forEach(cancelAnimationFrame);
     timeouts = [];
-    rafs = [];
     running = false;
     stopMatrixRain();
     step = 0;
@@ -240,7 +225,6 @@
       { titleChars: [], descChars: [], visible: false },
       { titleChars: [], descChars: [], visible: false },
     ];
-    // Clear canvas
     if (matrixCanvas) {
       const ctx = matrixCanvas.getContext("2d");
       if (ctx) ctx.clearRect(0, 0, matrixCanvas.width, matrixCanvas.height);
@@ -253,25 +237,20 @@
     const c = content[lang];
     step = 1;
 
-    // Start matrix rain immediately
+    // Start matrix rain immediately as ambient background
     startMatrixRain();
 
-    // Phase 1: Headline decodes
+    // Headline decodes
     schedule(() => {
       decodeText(c.headline, (chars) => (headlineChars = chars), 55, () => {
         headlineDone = true;
-
-        // Phase 2: Intro text decodes
+        // Intro decodes
         schedule(() => {
           step = 2;
           decodeText(c.intro, (chars) => (introChars = chars), 20, () => {
             introDone = true;
-
-            // Phase 3: Features decode one by one
-            schedule(() => {
-              step = 3;
-              decodeFeature(0, c);
-            }, 800);
+            // Features decode
+            schedule(() => { step = 3; decodeFeature(0, c); }, 800);
           });
         }, 700);
       });
@@ -281,168 +260,155 @@
   function decodeFeature(idx: number, c: typeof content.en) {
     if (!running || idx >= c.features.length) {
       step = 7;
-      // Fade out matrix rain after all features done
       stopMatrixRain();
       return;
     }
-
     features[idx].visible = true;
     features = [...features];
-
-    decodeText(
-      c.features[idx].title,
-      (chars) => {
-        features[idx].titleChars = chars;
-        features = [...features];
-      },
-      60,
-      () => {
-        decodeText(
-          c.features[idx].desc,
-          (chars) => {
-            features[idx].descChars = chars;
-            features = [...features];
-          },
-          16,
-          () => {
-            schedule(() => decodeFeature(idx + 1, c), 500);
-          }
-        );
-      }
-    );
+    decodeText(c.features[idx].title, (chars) => { features[idx].titleChars = chars; features = [...features]; }, 60, () => {
+      decodeText(c.features[idx].desc, (chars) => { features[idx].descChars = chars; features = [...features]; }, 16, () => {
+        schedule(() => decodeFeature(idx + 1, c), 500);
+      });
+    });
   }
 
   onMount(() => {
     lang = document.body.dataset.activeLang || "en";
-
     const mutObs = new MutationObserver(() => {
       const newLang = document.body.dataset.activeLang || "en";
-      if (newLang !== lang) {
-        lang = newLang;
-        if (running) startSequence();
-      }
+      if (newLang !== lang) { lang = newLang; if (running) startSequence(); }
     });
     mutObs.observe(document.body, { attributes: true, attributeFilter: ["data-active-lang"] });
 
-    const intObs = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          startSequence();
-        } else {
-          reset();
-        }
-      },
-      { threshold: 0.1 }
-    );
+    const intObs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) startSequence();
+      else reset();
+    }, { threshold: 0.1 });
     intObs.observe(el);
 
-    return () => {
-      reset();
-      mutObs.disconnect();
-      intObs.disconnect();
-    };
+    return () => { reset(); mutObs.disconnect(); intObs.disconnect(); };
   });
 </script>
 
-<div bind:this={el} class="relative space-y-10">
-  <!-- Matrix rain canvas — absolute behind everything -->
-  <canvas
-    bind:this={matrixCanvas}
-    class="matrix-canvas"
-  ></canvas>
+<div bind:this={el} class="solution-wrapper">
+  <!-- Matrix rain canvas — ABSOLUTE behind all content -->
+  <canvas bind:this={matrixCanvas} class="matrix-rain"></canvas>
 
-  <!-- Headline — bold bright gold when decoded -->
-  <div class="relative z-10 max-w-4xl">
-    <h2 class="font-heading text-3xl md:text-5xl lg:text-6xl font-black leading-tight min-h-[1.5em]">
-      {#if headlineChars.length > 0}
-        {#each headlineChars as { ch, done }}
-          <span
-            class="decode-char"
-            class:decoded-headline={done}
-            class:binary={!done}
-          >{ch}</span>
-        {/each}
-      {/if}
-    </h2>
-  </div>
-
-  <!-- Intro paragraph — bold gold when decoded -->
-  <div class="relative z-10 max-w-3xl min-h-[3em]">
-    {#if introChars.length > 0}
-      <p class="text-xl md:text-2xl leading-relaxed font-semibold">
-        {#each introChars as { ch, done }}
-          <span
-            class="decode-char"
-            class:decoded-intro={done}
-            class:binary={!done}
-          >{ch}</span>
-        {/each}
-      </p>
-    {/if}
-  </div>
-
-  <!-- Feature blocks -->
-  <div class="relative z-10 space-y-4 pt-4">
-    {#each features as feature, idx}
-      <div
-        class="feature-block p-6 rounded-xl border transition-all duration-500"
-        class:feature-visible={feature.visible}
-        class:feature-hidden={!feature.visible}
-      >
-        <!-- Feature title -->
-        <div class="mb-2 min-h-[1.5em]">
-          {#if feature.titleChars.length > 0}
-            <h3 class="font-mono text-sm md:text-base tracking-[0.2em]">
-              {#each feature.titleChars as { ch, done }}
-                <span
-                  class="decode-char"
-                  class:decoded-accent={done}
-                  class:binary={!done}
-                >{ch}</span>
-              {/each}
-            </h3>
-          {/if}
-        </div>
-
-        <!-- Feature description -->
-        <div class="min-h-[1.5em]">
-          {#if feature.descChars.length > 0}
-            <p class="text-base md:text-lg leading-relaxed">
-              {#each feature.descChars as { ch, done }}
-                <span
-                  class="decode-char"
-                  class:decoded={done}
-                  class:binary={!done}
-                >{ch}</span>
-              {/each}
-            </p>
-          {/if}
-        </div>
-
-        <!-- Scan line effect -->
-        {#if feature.visible && feature.descChars.some(c => !c.done)}
-          <div class="scan-line"></div>
+  <!-- All content sits above the canvas -->
+  <div class="content-layer">
+    <!-- Headline -->
+    <div class="max-w-4xl mb-10">
+      <h2 class="headline-text">
+        {#if headlineChars.length > 0}
+          {#each headlineChars as { ch, done }}
+            <span class="decode-char" class:decoded-headline={done} class:binary={!done}>{ch}</span>
+          {/each}
         {/if}
-      </div>
-    {/each}
+      </h2>
+    </div>
+
+    <!-- Intro -->
+    <div class="max-w-3xl min-h-[3em] mb-10">
+      {#if introChars.length > 0}
+        <p class="intro-text">
+          {#each introChars as { ch, done }}
+            <span class="decode-char" class:decoded-intro={done} class:binary={!done}>{ch}</span>
+          {/each}
+        </p>
+      {/if}
+    </div>
+
+    <!-- Feature blocks -->
+    <div class="space-y-4">
+      {#each features as feature, idx}
+        <div class="feature-block" class:feature-visible={feature.visible} class:feature-hidden={!feature.visible}>
+          <div class="mb-2 min-h-[1.5em]">
+            {#if feature.titleChars.length > 0}
+              <h3 class="feature-title">
+                {#each feature.titleChars as { ch, done }}
+                  <span class="decode-char" class:decoded-accent={done} class:binary={!done}>{ch}</span>
+                {/each}
+              </h3>
+            {/if}
+          </div>
+          <div class="min-h-[1.5em]">
+            {#if feature.descChars.length > 0}
+              <p class="feature-desc">
+                {#each feature.descChars as { ch, done }}
+                  <span class="decode-char" class:decoded={done} class:binary={!done}>{ch}</span>
+                {/each}
+              </p>
+            {/if}
+          </div>
+          {#if feature.visible && feature.descChars.some(c => !c.done)}
+            <div class="scan-line"></div>
+          {/if}
+        </div>
+      {/each}
+    </div>
   </div>
 </div>
 
 <style>
-  /* Matrix rain canvas — fills the section, sits behind content */
-  .matrix-canvas {
-    position: absolute;
-    inset: -2rem -1.5rem;
-    width: calc(100% + 3rem);
-    height: calc(100% + 4rem);
-    z-index: 0;
-    pointer-events: none;
-    opacity: 1;
+  /* Wrapper must be position:relative so canvas can be absolute inside it */
+  .solution-wrapper {
+    position: relative;
+    overflow: hidden;
   }
 
-  /* Binary/undecoded characters — barely visible */
+  /* Canvas fills the entire wrapper, sits at z-0 BEHIND everything */
+  .matrix-rain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* Content layer sits ABOVE the canvas */
+  .content-layer {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Headline: BOLD GOLD, unmissable ── */
+  .headline-text {
+    font-family: var(--font-heading);
+    font-size: clamp(1.875rem, 5vw, 3.75rem);
+    font-weight: 900;
+    line-height: 1.15;
+    min-height: 1.5em;
+    color: var(--color-accent);
+  }
+
+  /* ── Intro: bold gold ── */
+  .intro-text {
+    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+    line-height: 1.6;
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+
+  /* ── Feature title: mono, gold ── */
+  .feature-title {
+    font-family: var(--font-mono);
+    font-size: clamp(0.8rem, 1.5vw, 1rem);
+    letter-spacing: 0.2em;
+    color: var(--color-accent);
+  }
+
+  /* ── Feature description ── */
+  .feature-desc {
+    font-size: clamp(1rem, 1.8vw, 1.125rem);
+    line-height: 1.6;
+    color: var(--color-text);
+  }
+
+  /* Binary/undecoded characters — dim noise */
   .decode-char {
-    transition: color 0.2s ease, text-shadow 0.3s ease;
+    transition: color 0.15s ease, text-shadow 0.2s ease;
   }
   .binary {
     font-family: var(--font-mono);
@@ -450,33 +416,41 @@
     text-shadow: none;
   }
 
-  /* Headline decodes in bold bright gold with strong glow */
+  /* Decoded headline chars — bright gold with glow */
   .decoded-headline {
     color: var(--color-accent);
     text-shadow:
-      0 0 40px color-mix(in srgb, var(--color-accent) 40%, transparent),
-      0 0 80px color-mix(in srgb, var(--color-accent) 15%, transparent);
+      0 0 30px color-mix(in srgb, var(--color-accent) 50%, transparent),
+      0 0 60px color-mix(in srgb, var(--color-accent) 20%, transparent);
   }
 
-  /* Intro decodes in bold gold */
+  /* Decoded intro chars — gold */
   .decoded-intro {
     color: var(--color-accent);
-    text-shadow: 0 0 25px color-mix(in srgb, var(--color-accent) 25%, transparent);
+    text-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 30%, transparent);
   }
 
-  /* Feature descriptions decode in light text */
+  /* Decoded feature descriptions — light text */
   .decoded {
     color: var(--color-text);
     text-shadow: none;
   }
 
-  /* Feature titles in full accent gold */
+  /* Decoded feature titles — accent gold */
   .decoded-accent {
     color: var(--color-accent);
-    text-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 25%, transparent);
+    text-shadow: 0 0 15px color-mix(in srgb, var(--color-accent) 25%, transparent);
   }
 
   /* Feature blocks */
+  .feature-block {
+    position: relative;
+    overflow: hidden;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid transparent;
+    transition: all 0.5s ease;
+  }
   .feature-hidden {
     opacity: 0;
     transform: translateY(20px);
@@ -486,22 +460,17 @@
   .feature-visible {
     opacity: 1;
     transform: translateY(0);
-    border-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
     background: color-mix(in srgb, var(--color-accent) 3%, transparent);
   }
 
-  /* Horizontal scan line on active decode */
+  /* Scan line */
   .scan-line {
     position: absolute;
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      var(--color-accent),
-      transparent
-    );
+    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
     opacity: 0.3;
     animation: scanMove 2.5s ease-in-out infinite;
   }
@@ -509,10 +478,5 @@
     0% { top: 20%; }
     50% { top: 80%; }
     100% { top: 20%; }
-  }
-
-  .feature-block {
-    position: relative;
-    overflow: hidden;
   }
 </style>
