@@ -15,7 +15,9 @@
 
   // Decode display states — each block is an array of { char, decoded }
   let headlineChars = $state<{ ch: string; done: boolean }[]>([]);
+  let headlineDone = $state(false);
   let introChars = $state<{ ch: string; done: boolean }[]>([]);
+  let introDone = $state(false);
   let features = $state<
     { titleChars: { ch: string; done: boolean }[]; descChars: { ch: string; done: boolean }[]; visible: boolean }[]
   >([
@@ -97,9 +99,9 @@
     const lines: string[] = [];
     for (let i = 0; i < count; i++) {
       let line = "";
-      const len = 40 + Math.floor(Math.random() * 40);
+      const len = 60 + Math.floor(Math.random() * 60);
       for (let j = 0; j < len; j++) {
-        line += Math.random() > 0.7 ? " " : randChar(BINARY);
+        line += Math.random() > 0.6 ? " " : randChar(BINARY);
       }
       lines.push(line);
     }
@@ -122,15 +124,14 @@
     setter([...chars]);
 
     let decoded = 0;
-    const scrambleInterval = 50;
-    let scrambleRaf: number;
+    const scrambleInterval = 60;
 
     // Scramble undecoded characters
     function scramble() {
       if (!running) return;
+      let changed = false;
       for (let i = decoded; i < len; i++) {
         if (text[i] !== " " && !chars[i].done) {
-          // Chars near the decode frontier get more hex/glitch
           const dist = i - decoded;
           if (dist < 3) {
             chars[i] = { ch: randChar(HEX), done: false };
@@ -139,20 +140,19 @@
           } else {
             chars[i] = { ch: randChar(BINARY), done: false };
           }
+          changed = true;
         }
       }
-      setter([...chars]);
-      scrambleRaf = requestAnimationFrame(() => {
+      if (changed) setter([...chars]);
+      if (decoded < len) {
         schedule(scramble, scrambleInterval);
-      });
-      rafs.push(scrambleRaf);
+      }
     }
     scramble();
 
     // Progressively decode characters
     function decodeTick() {
       if (!running || decoded >= len) {
-        // Final pass - set all chars to done
         for (let i = 0; i < len; i++) {
           chars[i] = { ch: text[i], done: true };
         }
@@ -161,8 +161,8 @@
         return;
       }
 
-      // Decode 1-3 chars per tick for natural feel
-      const batch = Math.min(1 + Math.floor(Math.random() * 2), len - decoded);
+      // Decode 1-2 chars per tick (slower, more deliberate)
+      const batch = Math.min(1 + Math.floor(Math.random() * 1.5), len - decoded);
       for (let b = 0; b < batch; b++) {
         if (decoded < len) {
           chars[decoded] = { ch: text[decoded], done: true };
@@ -173,7 +173,7 @@
       schedule(decodeTick, speed);
     }
 
-    schedule(decodeTick, speed * 3); // Brief delay before decode starts
+    schedule(decodeTick, speed * 4); // Longer pause before decode starts
   }
 
   function reset() {
@@ -184,7 +184,9 @@
     running = false;
     step = 0;
     headlineChars = [];
+    headlineDone = false;
     introChars = [];
+    introDone = false;
     matrixLines = [];
     matrixVisible = false;
     matrixFading = false;
@@ -201,30 +203,33 @@
     running = true;
     const c = content[lang];
 
-    // Phase 0: Binary matrix rain fades in
-    matrixLines = generateMatrixLines(12);
+    // Phase 0: Binary matrix fades in
+    matrixLines = generateMatrixLines(16);
     matrixVisible = true;
     step = 1;
 
-    // Phase 1: Headline decodes from binary (after brief matrix display)
+    // Phase 1: Headline decodes (20% slower: 35 → 42)
     schedule(() => {
-      decodeText(c.headline, (chars) => (headlineChars = chars), 35, () => {
+      decodeText(c.headline, (chars) => (headlineChars = chars), 42, () => {
+        headlineDone = true;
+        // Start fading matrix once headline is resolved
+        matrixFading = true;
 
-        // Phase 2: Intro text decodes
+        // Phase 2: Intro text decodes (20% slower: 12 → 15)
         schedule(() => {
           step = 2;
-          decodeText(c.intro, (chars) => (introChars = chars), 12, () => {
+          decodeText(c.intro, (chars) => (introChars = chars), 15, () => {
+            introDone = true;
 
             // Phase 3: Features decode one by one
             schedule(() => {
               step = 3;
-              matrixFading = true; // Start fading the background matrix
               decodeFeature(0, c);
-            }, 500);
+            }, 600);
           });
-        }, 400);
+        }, 500);
       });
-    }, 800);
+    }, 1000);
   }
 
   function decodeFeature(idx: number, c: typeof content.en) {
@@ -234,25 +239,27 @@
     }
 
     features[idx].visible = true;
-    features = [...features]; // trigger reactivity
+    features = [...features];
 
+    // Feature title decode (20% slower: 40 → 48)
     decodeText(
       c.features[idx].title,
       (chars) => {
         features[idx].titleChars = chars;
         features = [...features];
       },
-      40,
+      48,
       () => {
+        // Feature desc decode (20% slower: 10 → 12)
         decodeText(
           c.features[idx].desc,
           (chars) => {
             features[idx].descChars = chars;
             features = [...features];
           },
-          10,
+          12,
           () => {
-            schedule(() => decodeFeature(idx + 1, c), 300);
+            schedule(() => decodeFeature(idx + 1, c), 400);
           }
         );
       }
@@ -292,16 +299,16 @@
 </script>
 
 <div bind:this={el} class="relative space-y-10">
-  <!-- Binary matrix background -->
+  <!-- Binary matrix background — sits behind everything -->
   {#if matrixVisible}
     <div
-      class="matrix-bg absolute inset-0 -inset-x-6 overflow-hidden pointer-events-none select-none"
+      class="matrix-bg absolute inset-0 -inset-x-6 -inset-y-10 overflow-hidden pointer-events-none select-none z-0"
       class:matrix-fade={matrixFading}
     >
       {#each matrixLines as line, i}
         <div
-          class="font-mono text-[10px] md:text-xs leading-relaxed whitespace-nowrap text-[var(--color-accent)]/[0.06] matrix-line"
-          style="animation-delay: {i * 0.15}s"
+          class="matrix-line font-mono text-[10px] md:text-xs leading-[2] whitespace-nowrap"
+          style="animation-delay: {i * 0.2}s"
         >
           {line}
         </div>
@@ -309,14 +316,14 @@
     </div>
   {/if}
 
-  <!-- Headline -->
-  <div class="relative max-w-4xl">
+  <!-- Headline — gold accent when decoded -->
+  <div class="relative z-10 max-w-4xl">
     <h2 class="font-heading text-3xl md:text-5xl lg:text-6xl font-bold leading-tight min-h-[1.5em]">
       {#if headlineChars.length > 0}
-        {#each headlineChars as { ch, done }, i}
+        {#each headlineChars as { ch, done }}
           <span
             class="decode-char"
-            class:decoded={done}
+            class:decoded-headline={done}
             class:binary={!done}
           >{ch}</span>
         {/each}
@@ -324,14 +331,14 @@
     </h2>
   </div>
 
-  <!-- Intro paragraph -->
-  <div class="relative max-w-3xl min-h-[3em]">
+  <!-- Intro paragraph — gold accent when decoded -->
+  <div class="relative z-10 max-w-3xl min-h-[3em]">
     {#if introChars.length > 0}
       <p class="text-xl md:text-2xl leading-relaxed">
         {#each introChars as { ch, done }}
           <span
             class="decode-char"
-            class:decoded={done}
+            class:decoded-intro={done}
             class:binary={!done}
           >{ch}</span>
         {/each}
@@ -340,7 +347,7 @@
   </div>
 
   <!-- Feature blocks -->
-  <div class="relative space-y-4 pt-4">
+  <div class="relative z-10 space-y-4 pt-4">
     {#each features as feature, idx}
       <div
         class="feature-block p-6 rounded-xl border transition-all duration-500"
@@ -387,35 +394,54 @@
 </div>
 
 <style>
-  /* Binary/undecoded characters */
+  /* Binary/undecoded characters — dim, sits behind resolved text */
   .decode-char {
-    transition: color 0.15s ease;
+    transition: color 0.2s ease, text-shadow 0.3s ease;
   }
   .binary {
     font-family: var(--font-mono);
-    color: color-mix(in srgb, var(--color-accent) 30%, transparent);
-    text-shadow: 0 0 8px color-mix(in srgb, var(--color-accent) 15%, transparent);
+    color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    text-shadow: none;
   }
+
+  /* Headline decodes in bright gold */
+  .decoded-headline {
+    color: var(--color-accent);
+    text-shadow: 0 0 30px color-mix(in srgb, var(--color-accent) 30%, transparent);
+  }
+
+  /* Intro decodes in slightly muted gold */
+  .decoded-intro {
+    color: color-mix(in srgb, var(--color-accent) 80%, var(--color-text));
+    text-shadow: 0 0 15px color-mix(in srgb, var(--color-accent) 15%, transparent);
+  }
+
+  /* Feature descriptions decode in light text */
   .decoded {
     color: var(--color-text);
+    text-shadow: none;
   }
+
+  /* Feature titles in full accent */
   .decoded-accent {
     color: var(--color-accent);
     text-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 25%, transparent);
   }
 
-  /* Matrix background lines */
+  /* Matrix background lines — very dim, pure background */
   .matrix-bg {
-    transition: opacity 2s ease;
+    opacity: 1;
+    transition: opacity 3s ease;
   }
   .matrix-bg.matrix-fade {
     opacity: 0;
   }
   .matrix-line {
-    animation: matrixPulse 4s ease-in-out infinite alternate;
+    color: color-mix(in srgb, var(--color-accent) 6%, transparent);
+    animation: matrixPulse 5s ease-in-out infinite alternate;
   }
   @keyframes matrixPulse {
-    0% { opacity: 0.3; }
+    0% { opacity: 0.4; }
     100% { opacity: 1; }
   }
 
@@ -445,8 +471,8 @@
       var(--color-accent),
       transparent
     );
-    opacity: 0.4;
-    animation: scanMove 2s ease-in-out infinite;
+    opacity: 0.3;
+    animation: scanMove 2.5s ease-in-out infinite;
   }
   @keyframes scanMove {
     0% { top: 20%; }
@@ -454,7 +480,6 @@
     100% { top: 20%; }
   }
 
-  /* Relative positioning for scan lines */
   .feature-block {
     position: relative;
     overflow: hidden;
