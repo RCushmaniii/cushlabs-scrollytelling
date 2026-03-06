@@ -2,16 +2,13 @@
   import { onMount } from "svelte";
 
   let el: HTMLElement;
+  let matrixCanvas: HTMLCanvasElement;
   let lang = $state("en");
   let step = $state(0);
   let running = $state(false);
+  let matrixRunning = $state(false);
   let timeouts: ReturnType<typeof setTimeout>[] = [];
   let rafs: number[] = [];
-
-  // Binary rain background state
-  let matrixLines = $state<string[]>([]);
-  let matrixVisible = $state(false);
-  let matrixFading = $state(false);
 
   // Decode display states — each block is an array of { char, decoded }
   let headlineChars = $state<{ ch: string; done: boolean }[]>([]);
@@ -82,6 +79,73 @@
     },
   };
 
+  // ── Matrix Rain (canvas-based) ──
+  function startMatrixRain() {
+    if (!matrixCanvas || matrixRunning) return;
+    matrixRunning = true;
+
+    const ctx = matrixCanvas.getContext("2d")!;
+    const fontSize = 14;
+    const chars = "01";
+
+    function resize() {
+      const rect = el.getBoundingClientRect();
+      matrixCanvas.width = rect.width;
+      matrixCanvas.height = rect.height;
+    }
+    resize();
+
+    const columns = Math.floor(matrixCanvas.width / fontSize);
+    const drops: number[] = new Array(columns).fill(0).map(() => Math.random() * -50);
+
+    // Get the accent color from CSS vars
+    const style = getComputedStyle(el);
+    const accent = style.getPropertyValue("--color-accent").trim() || "#F5C542";
+
+    function draw() {
+      if (!matrixRunning) return;
+
+      // Semi-transparent black to create trail effect
+      ctx.fillStyle = "rgba(10, 10, 10, 0.06)";
+      ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+
+      ctx.font = `${fontSize}px monospace`;
+
+      for (let i = 0; i < drops.length; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        const y = drops[i] * fontSize;
+
+        // Bright head character
+        ctx.fillStyle = accent;
+        ctx.globalAlpha = 0.12;
+        ctx.fillText(char, x, y);
+
+        // Dimmer trail
+        ctx.globalAlpha = 0.04;
+        ctx.fillText(chars[Math.floor(Math.random() * chars.length)], x, y - fontSize);
+
+        // Move drop down
+        drops[i]++;
+
+        // Reset drop to top randomly after it passes bottom
+        if (drops[i] * fontSize > matrixCanvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+      }
+
+      ctx.globalAlpha = 1;
+      const raf = requestAnimationFrame(draw);
+      rafs.push(raf);
+    }
+
+    draw();
+  }
+
+  function stopMatrixRain() {
+    matrixRunning = false;
+  }
+
   function schedule(fn: () => void, ms: number) {
     const id = setTimeout(() => {
       if (running) fn();
@@ -94,20 +158,6 @@
     return set[Math.floor(Math.random() * set.length)];
   }
 
-  // Generate binary block for background ambiance
-  function generateMatrixLines(count: number): string[] {
-    const lines: string[] = [];
-    for (let i = 0; i < count; i++) {
-      let line = "";
-      const len = 60 + Math.floor(Math.random() * 60);
-      for (let j = 0; j < len; j++) {
-        line += Math.random() > 0.6 ? " " : randChar(BINARY);
-      }
-      lines.push(line);
-    }
-    return lines;
-  }
-
   // Decode effect: binary → glitch → resolved text
   function decodeText(
     text: string,
@@ -116,7 +166,6 @@
     onDone?: () => void
   ) {
     const len = text.length;
-    // Init with binary
     let chars: { ch: string; done: boolean }[] = [];
     for (let i = 0; i < len; i++) {
       chars.push({ ch: text[i] === " " ? " " : randChar(BINARY), done: text[i] === " " });
@@ -126,7 +175,6 @@
     let decoded = 0;
     const scrambleInterval = 60;
 
-    // Scramble undecoded characters
     function scramble() {
       if (!running) return;
       let changed = false;
@@ -150,7 +198,6 @@
     }
     scramble();
 
-    // Progressively decode characters
     function decodeTick() {
       if (!running || decoded >= len) {
         for (let i = 0; i < len; i++) {
@@ -161,7 +208,6 @@
         return;
       }
 
-      // Decode 1-2 chars per tick (slower, more deliberate)
       const batch = Math.min(1 + Math.floor(Math.random() * 1.5), len - decoded);
       for (let b = 0; b < batch; b++) {
         if (decoded < len) {
@@ -173,7 +219,7 @@
       schedule(decodeTick, speed);
     }
 
-    schedule(decodeTick, speed * 4); // Longer pause before decode starts
+    schedule(decodeTick, speed * 4);
   }
 
   function reset() {
@@ -182,38 +228,38 @@
     timeouts = [];
     rafs = [];
     running = false;
+    stopMatrixRain();
     step = 0;
     headlineChars = [];
     headlineDone = false;
     introChars = [];
     introDone = false;
-    matrixLines = [];
-    matrixVisible = false;
-    matrixFading = false;
     features = [
       { titleChars: [], descChars: [], visible: false },
       { titleChars: [], descChars: [], visible: false },
       { titleChars: [], descChars: [], visible: false },
       { titleChars: [], descChars: [], visible: false },
     ];
+    // Clear canvas
+    if (matrixCanvas) {
+      const ctx = matrixCanvas.getContext("2d");
+      if (ctx) ctx.clearRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+    }
   }
 
   function startSequence() {
     reset();
     running = true;
     const c = content[lang];
-
-    // Phase 0: Binary matrix fades in
-    matrixLines = generateMatrixLines(16);
-    matrixVisible = true;
     step = 1;
 
-    // Phase 1: Headline decodes — slow and deliberate
+    // Start matrix rain immediately
+    startMatrixRain();
+
+    // Phase 1: Headline decodes
     schedule(() => {
       decodeText(c.headline, (chars) => (headlineChars = chars), 55, () => {
         headlineDone = true;
-        // Start fading matrix once headline is resolved
-        matrixFading = true;
 
         // Phase 2: Intro text decodes
         schedule(() => {
@@ -235,13 +281,14 @@
   function decodeFeature(idx: number, c: typeof content.en) {
     if (!running || idx >= c.features.length) {
       step = 7;
+      // Fade out matrix rain after all features done
+      stopMatrixRain();
       return;
     }
 
     features[idx].visible = true;
     features = [...features];
 
-    // Feature title decode
     decodeText(
       c.features[idx].title,
       (chars) => {
@@ -250,7 +297,6 @@
       },
       60,
       () => {
-        // Feature desc decode
         decodeText(
           c.features[idx].desc,
           (chars) => {
@@ -299,22 +345,11 @@
 </script>
 
 <div bind:this={el} class="relative space-y-10">
-  <!-- Binary matrix background — sits behind everything -->
-  {#if matrixVisible}
-    <div
-      class="matrix-bg absolute inset-0 -inset-x-6 -inset-y-10 overflow-hidden pointer-events-none select-none z-0"
-      class:matrix-fade={matrixFading}
-    >
-      {#each matrixLines as line, i}
-        <div
-          class="matrix-line font-mono text-[10px] md:text-xs leading-[2] whitespace-nowrap"
-          style="animation-delay: {i * 0.2}s"
-        >
-          {line}
-        </div>
-      {/each}
-    </div>
-  {/if}
+  <!-- Matrix rain canvas — absolute behind everything -->
+  <canvas
+    bind:this={matrixCanvas}
+    class="matrix-canvas"
+  ></canvas>
 
   <!-- Headline — bold bright gold when decoded -->
   <div class="relative z-10 max-w-4xl">
@@ -394,13 +429,24 @@
 </div>
 
 <style>
-  /* Binary/undecoded characters — barely visible background noise */
+  /* Matrix rain canvas — fills the section, sits behind content */
+  .matrix-canvas {
+    position: absolute;
+    inset: -2rem -1.5rem;
+    width: calc(100% + 3rem);
+    height: calc(100% + 4rem);
+    z-index: 0;
+    pointer-events: none;
+    opacity: 1;
+  }
+
+  /* Binary/undecoded characters — barely visible */
   .decode-char {
     transition: color 0.2s ease, text-shadow 0.3s ease;
   }
   .binary {
     font-family: var(--font-mono);
-    color: color-mix(in srgb, var(--color-accent) 5%, transparent);
+    color: color-mix(in srgb, var(--color-accent) 8%, transparent);
     text-shadow: none;
   }
 
@@ -424,27 +470,10 @@
     text-shadow: none;
   }
 
-  /* Feature titles in full accent */
+  /* Feature titles in full accent gold */
   .decoded-accent {
     color: var(--color-accent);
     text-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 25%, transparent);
-  }
-
-  /* Matrix background lines — very dim, pure background */
-  .matrix-bg {
-    opacity: 1;
-    transition: opacity 3s ease;
-  }
-  .matrix-bg.matrix-fade {
-    opacity: 0;
-  }
-  .matrix-line {
-    color: color-mix(in srgb, var(--color-accent) 3%, transparent);
-    animation: matrixPulse 5s ease-in-out infinite alternate;
-  }
-  @keyframes matrixPulse {
-    0% { opacity: 0.3; }
-    100% { opacity: 0.7; }
   }
 
   /* Feature blocks */
