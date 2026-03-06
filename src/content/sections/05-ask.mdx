@@ -8,6 +8,8 @@ title:
   es: "Hablemos"
 ---
 
+import ObfuscatedEmail from "@/components/ui/ObfuscatedEmail.svelte";
+
 <div class="space-y-8 text-center max-w-3xl mx-auto">
   <h2 class="reveal reveal-delay-2 font-heading text-3xl md:text-5xl font-bold leading-tight">
     <span data-lang="en" class="active">Ready to make your audience <span class="text-[var(--color-accent)]">lean in</span>?</span>
@@ -52,8 +54,7 @@ title:
 
   <div class="reveal reveal-delay-5 pt-12 pb-4">
     <p class="text-sm text-[var(--color-text-muted)] opacity-60">
-      <span data-lang="en" class="active">info@cushlabs.ai</span>
-      <span data-lang="es">info@cushlabs.ai</span>
+      <ObfuscatedEmail client:load />
     </p>
   </div>
 </div>

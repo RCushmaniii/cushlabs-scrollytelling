@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { currentLang } from "@/lib/i18n";
+  import { openMailto } from "@/lib/email";
 
   let activeLang = $state("en");
   let open = $state(false);
@@ -29,9 +30,10 @@
     e.preventDefault();
     // In production, this would POST to an API endpoint
     // For now, construct a mailto link as fallback
-    const subject = encodeURIComponent(`Scrollytelling Consultation — ${company || name}`);
-    const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\nCompany: ${company}\n\n${message}`);
-    window.open(`mailto:info@cushlabs.ai?subject=${subject}&body=${body}`);
+    openMailto(
+      `Scrollytelling Consultation — ${company || name}`,
+      `Name: ${name}\nEmail: ${email}\nCompany: ${company}\n\n${message}`
+    );
     submitted = true;
     setTimeout(() => { hide(); submitted = false; name = email = company = message = ""; }, 3000);
   }
@@ -62,7 +64,11 @@
 
       {#if submitted}
         <div class="text-center py-8">
-          <div class="text-4xl mb-4">&#10003;</div>
+          <div class="mb-4">
+            <svg class="w-12 h-12 mx-auto text-[var(--color-accent)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
           <h3 class="font-heading text-xl font-bold text-[var(--color-text)] mb-2">
             {activeLang === "es" ? "Mensaje enviado" : "Message sent"}
           </h3>
