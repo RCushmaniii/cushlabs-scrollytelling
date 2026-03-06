@@ -1,0 +1,27 @@
+---
+import { config } from "../../../scrollytelling.config.ts";
+
+interface Props {
+  image: string;
+  alt?: string;
+  overlay?: boolean;
+}
+
+const { image, alt = "", overlay = true } = Astro.props;
+const enabled = config.effects.parallax;
+---
+
+<div class="absolute inset-0 overflow-hidden">
+  <div
+    class:list={[
+      "absolute inset-0 bg-cover bg-center bg-no-repeat",
+      enabled && "md:bg-fixed",
+    ]}
+    style={`background-image: url('${image}')`}
+    role="img"
+    aria-label={alt}
+  />
+  {overlay && (
+    <div class="absolute inset-0 bg-gradient-to-b from-[var(--color-background)]/70 via-[var(--color-background)]/50 to-[var(--color-background)]" />
+  )}
+</div>

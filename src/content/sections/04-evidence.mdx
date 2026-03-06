@@ -1,0 +1,69 @@
+---
+order: 4
+id: evidence
+type: content
+number: "03"
+background: "linear-gradient(180deg, var(--color-background), var(--color-surface), var(--color-background))"
+title:
+  en: "The Evidence"
+  es: "La Evidencia"
+---
+
+import AnimatedCounter from "@/components/ui/AnimatedCounter.svelte";
+
+<div class="space-y-8">
+  <h2 class="reveal reveal-delay-2 font-heading text-3xl md:text-5xl font-bold">
+    <span data-lang="en" class="active">Numbers that <span class="text-[var(--color-accent)]">speak</span>.</span>
+    <span data-lang="es">Numeros que <span class="text-[var(--color-accent)]">hablan</span>.</span>
+  </h2>
+
+  <div class="grid md:grid-cols-4 gap-6 pt-8">
+    <div class="reveal reveal-delay-3 text-center p-6">
+      <div class="text-4xl md:text-5xl text-[var(--color-accent)]">
+        <AnimatedCounter client:visible target={500} suffix="+" duration={2000} />
+      </div>
+      <p class="text-sm text-[var(--color-text-muted)] mt-2">
+        <span data-lang="en" class="active">Projects Delivered</span>
+        <span data-lang="es">Proyectos Entregados</span>
+      </p>
+    </div>
+    <div class="reveal reveal-delay-4 text-center p-6">
+      <div class="text-4xl md:text-5xl text-[var(--color-accent)]">
+        <AnimatedCounter client:visible target={98} suffix="%" duration={2000} />
+      </div>
+      <p class="text-sm text-[var(--color-text-muted)] mt-2">
+        <span data-lang="en" class="active">Client Satisfaction</span>
+        <span data-lang="es">Satisfaccion del Cliente</span>
+      </p>
+    </div>
+    <div class="reveal reveal-delay-5 text-center p-6">
+      <div class="text-4xl md:text-5xl text-[var(--color-accent)]">
+        <AnimatedCounter client:visible target={12} duration={1500} />
+      </div>
+      <p class="text-sm text-[var(--color-text-muted)] mt-2">
+        <span data-lang="en" class="active">Countries Served</span>
+        <span data-lang="es">Paises Atendidos</span>
+      </p>
+    </div>
+    <div class="reveal reveal-delay-6 text-center p-6">
+      <div class="text-4xl md:text-5xl text-[var(--color-accent)]">
+        <AnimatedCounter client:visible target={2.5} suffix="M" prefix="$" duration={2500} />
+      </div>
+      <p class="text-sm text-[var(--color-text-muted)] mt-2">
+        <span data-lang="en" class="active">Capital Raised</span>
+        <span data-lang="es">Capital Recaudado</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="reveal reveal-delay-7 max-w-3xl mx-auto text-center pt-8">
+    <blockquote class="text-xl md:text-2xl italic font-heading text-[var(--color-text)]">
+      <span data-lang="en" class="active">"The scrollytelling pitch deck was the most memorable presentation we'd ever seen."</span>
+      <span data-lang="es">"La presentacion con scrollytelling fue la mas memorable que habiamos visto."</span>
+    </blockquote>
+    <cite class="block mt-4 text-sm text-[var(--color-text-muted)] not-italic">
+      <span data-lang="en" class="active">— Demo Client, Venture Capital</span>
+      <span data-lang="es">— Cliente Demo, Capital de Riesgo</span>
+    </cite>
+  </div>
+</div>

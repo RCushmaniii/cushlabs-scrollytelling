@@ -1,0 +1,25 @@
+---
+interface Props {
+  id: string;
+  class?: string;
+  background?: string;
+  fullHeight?: boolean;
+}
+
+const { id, class: className = "", background, fullHeight = true } = Astro.props;
+---
+
+<section
+  id={id}
+  class:list={[
+    "relative w-full overflow-hidden",
+    fullHeight && "min-h-screen",
+    "flex items-center justify-center",
+    className,
+  ]}
+  style={background ? `background: ${background}` : undefined}
+>
+  <div class="relative z-10 w-full max-w-6xl mx-auto px-6 py-20 md:py-32">
+    <slot />
+  </div>
+</section>

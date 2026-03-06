@@ -1,0 +1,54 @@
+---
+import { config } from "../../../scrollytelling.config.ts";
+
+const enabled = config.effects.fireflies;
+const count = 20;
+---
+
+{enabled && (
+  <div class="fireflies-container fixed inset-0 pointer-events-none z-[1] overflow-hidden" aria-hidden="true">
+    {Array.from({ length: count }).map((_, i) => (
+      <div
+        class="firefly absolute rounded-full"
+        style={`
+          width: ${2 + Math.random() * 3}px;
+          height: ${2 + Math.random() * 3}px;
+          left: ${Math.random() * 100}%;
+          top: ${Math.random() * 100}%;
+          animation-delay: ${Math.random() * 8}s;
+          animation-duration: ${6 + Math.random() * 8}s;
+        `}
+      />
+    ))}
+  </div>
+)}
+
+<style>
+  .firefly {
+    background: var(--color-accent);
+    box-shadow: 0 0 6px 2px var(--color-accent);
+    opacity: 0;
+    animation: fireflyFloat linear infinite;
+  }
+
+  @keyframes fireflyFloat {
+    0% {
+      opacity: 0;
+      transform: translate(0, 0);
+    }
+    10% {
+      opacity: 0.8;
+    }
+    50% {
+      opacity: 0.3;
+      transform: translate(calc(var(--drift-x, 40px)), calc(var(--drift-y, -60px)));
+    }
+    90% {
+      opacity: 0.6;
+    }
+    100% {
+      opacity: 0;
+      transform: translate(calc(var(--drift-x, 40px) * 2), calc(var(--drift-y, -60px) * 2));
+    }
+  }
+</style>

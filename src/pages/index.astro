@@ -1,0 +1,55 @@
+---
+import { getCollection } from "astro:content";
+import ScrollytellingLayout from "@/layouts/ScrollytellingLayout.astro";
+import HeroSection from "@/components/sections/HeroSection.astro";
+import ContentSection from "@/components/sections/ContentSection.astro";
+import Fireflies from "@/components/effects/Fireflies.astro";
+import GrainOverlay from "@/components/effects/GrainOverlay.astro";
+import LanguageToggle from "@/components/ui/LanguageToggle.svelte";
+import AudioToggle from "@/components/ui/AudioToggle.svelte";
+import ProgressBar from "@/components/ui/ProgressBar.svelte";
+import ScrollNav from "@/components/ui/ScrollNav.svelte";
+import CtaModal from "@/components/ui/CtaModal.svelte";
+
+const sections = (await getCollection("sections")).sort(
+  (a, b) => a.data.order - b.data.order
+);
+---
+
+<ScrollytellingLayout>
+  <ProgressBar slot="progress-bar" client:load />
+  <LanguageToggle slot="language-toggle" client:load />
+  <AudioToggle slot="audio-toggle" client:load />
+  <ScrollNav slot="scroll-nav" client:load />
+  <GrainOverlay slot="grain" />
+  <CtaModal slot="modal" client:load title="Get in Touch">
+    <p class="text-[var(--color-text-muted)]">
+      <span data-lang="en" class="active">We'd love to help you build your next pitch deck.</span>
+      <span data-lang="es">Nos encantaria ayudarte a construir tu proxima presentacion.</span>
+    </p>
+  </CtaModal>
+
+  <Fireflies />
+
+  {sections.map(async (section) => {
+    const { Content } = await section.render();
+
+    if (section.data.type === "hero") {
+      return (
+        <HeroSection id={section.data.id} backgroundImage={section.data.backgroundImage}>
+          <Content />
+        </HeroSection>
+      );
+    }
+
+    return (
+      <ContentSection
+        id={section.data.id}
+        number={section.data.number}
+        background={section.data.background}
+      >
+        <Content />
+      </ContentSection>
+    );
+  })}
+</ScrollytellingLayout>

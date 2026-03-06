@@ -1,0 +1,26 @@
+---
+interface Props {
+  id: string;
+  number?: string;
+  background?: string;
+}
+
+const { id, number, background } = Astro.props;
+---
+
+<section
+  id={id}
+  class="relative w-full min-h-screen flex items-center justify-center overflow-hidden"
+  style={background ? `background: ${background}` : undefined}
+>
+  <div class="relative z-10 w-full max-w-5xl mx-auto px-6 py-20 md:py-32">
+    {number && (
+      <div class="reveal reveal-delay-1 mb-6">
+        <span class="font-mono text-sm tracking-[0.3em] uppercase text-[var(--color-accent)] opacity-70">
+          {number}
+        </span>
+      </div>
+    )}
+    <slot />
+  </div>
+</section>

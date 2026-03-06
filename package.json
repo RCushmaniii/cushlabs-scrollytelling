@@ -1,0 +1,24 @@
+{
+  "name": "cushlabs-scrollytelling",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "CushLabs cinematic scrollytelling template for pitch decks",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp"]
+  },
+  "dependencies": {
+    "astro": "^5.5.0",
+    "@astrojs/svelte": "^7.0.0",
+    "@astrojs/tailwind": "^6.0.0",
+    "@astrojs/mdx": "^4.0.0",
+    "@astrojs/vercel": "^8.0.0",
+    "svelte": "^5.0.0",
+    "tailwindcss": "^3.4.0"
+  }
+}

@@ -1,0 +1,66 @@
+---
+import { config } from "../../scrollytelling.config.ts";
+import "@/styles/base.css";
+import "@/styles/reveals.css";
+import "@/styles/reduced-motion.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = config.site.title, description = config.site.description } = Astro.props;
+const defaultLang = config.languages.find((l) => l.default)?.code ?? "en";
+---
+
+<!doctype html>
+<html lang={defaultLang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href={config.fonts.googleFontsUrl} rel="stylesheet" />
+    <style
+      define:vars={{
+        "font-heading": config.fonts.heading,
+        "font-body": config.fonts.body,
+        "font-mono": config.fonts.mono,
+        "color-primary": config.colors.primary,
+        "color-secondary": config.colors.secondary,
+        "color-accent": config.colors.accent,
+        "color-background": config.colors.background,
+        "color-surface": config.colors.surface,
+        "color-text": config.colors.text,
+        "color-text-muted": config.colors.textMuted,
+      }}
+    >
+    </style>
+  </head>
+  <body data-active-lang={defaultLang}>
+    <!-- Fixed UI chrome -->
+    <slot name="progress-bar" />
+    <slot name="language-toggle" />
+    <slot name="audio-toggle" />
+
+    <!-- Main content -->
+    <main>
+      <slot />
+    </main>
+
+    <!-- Fixed bottom nav -->
+    <slot name="scroll-nav" />
+
+    <!-- Overlays -->
+    <slot name="grain" />
+    <slot name="modal" />
+
+    <!-- Scroll reveal initialization -->
+    <script>
+      import { initScrollReveals } from "@/lib/scroll";
+      initScrollReveals();
+    </script>
+  </body>
+</html>
