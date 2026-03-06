@@ -48,8 +48,8 @@ const defaultLang = config.languages.find((l) => l.default)?.code ?? "en";
     <slot name="language-toggle" />
     <slot name="audio-toggle" />
 
-    <!-- Main content -->
-    <main>
+    <!-- Main content (max-width prevents ultra-wide ping-pong on large monitors) -->
+    <main class="max-w-[1440px] mx-auto">
       <slot />
     </main>
 

@@ -36,7 +36,7 @@
 
 {#if state === "overlay"}
   <div
-    class="presentation-overlay fixed inset-0 z-[300] flex items-center justify-center bg-[var(--color-background)]"
+    class="presentation-overlay fixed inset-0 z-[300] flex items-center justify-center bg-[var(--color-background)]/90 backdrop-blur-sm"
     class:fade-out={fadeOut}
   >
     <div class="text-center px-6 max-w-2xl">
@@ -87,7 +87,7 @@
     onclick={() => {
       import("@/lib/presentation").then(m => m.exitPresentation());
     }}
-    class="pres-exit-btn fixed top-4 right-20 z-50 px-4 py-2 text-xs font-medium bg-black/40 backdrop-blur-md rounded-full border border-white/10 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+    class="pres-exit-btn fixed top-14 right-4 z-50 px-4 py-2 text-xs font-medium bg-black/40 backdrop-blur-md rounded-full border border-white/10 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
   >
     <span data-lang="en" class="active">Exit Presentation</span>
     <span data-lang="es">Salir de Presentacion</span>
