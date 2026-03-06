@@ -1,0 +1,12 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+import PageNavbar from "@/components/ui/PageNavbar.svelte";
+import Footer from "@/components/ui/Footer.svelte";
+import ContactPage from "@/components/pages/ContactPage.svelte";
+---
+
+<PageLayout title="Contact — CushLabs AI Services" description="Get in touch with CushLabs. Send a message, reach out on WhatsApp, or book a free consultation.">
+  <PageNavbar slot="navbar" client:load />
+  <ContactPage client:load />
+  <Footer slot="footer" client:load />
+</PageLayout>

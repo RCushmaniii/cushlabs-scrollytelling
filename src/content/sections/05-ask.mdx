@@ -31,24 +31,19 @@ import ObfuscatedEmail from "@/components/ui/ObfuscatedEmail.svelte";
   </div>
 
   <div class="reveal reveal-delay-4 flex flex-col sm:flex-row gap-4 justify-center pt-6">
-    <button
-      onclick="window.__openConsultation?.()"
+    <a
+      href="/consultation"
       class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-background)] font-semibold rounded-full transition-transform duration-300 hover:scale-105"
     >
       <span data-lang="en" class="active">Book a Free Consultation</span>
       <span data-lang="es">Reserva una Consulta Gratuita</span>
-    </button>
+    </a>
     <a
-      href="https://atlas-biodiversidad-pitch.vercel.app"
-      target="_blank"
-      rel="noopener noreferrer"
+      href="/contact"
       class="inline-flex items-center justify-center gap-2 px-8 py-3 border-2 border-[var(--color-accent)] text-[var(--color-accent)] font-semibold rounded-full transition-all duration-300 hover:bg-[var(--color-accent)] hover:text-[var(--color-background)]"
     >
-      <span data-lang="en" class="active">View Live Demo</span>
-      <span data-lang="es">Ver Demo en Vivo</span>
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-      </svg>
+      <span data-lang="en" class="active">Send a Message</span>
+      <span data-lang="es">Enviar un Mensaje</span>
     </a>
   </div>
 

@@ -81,13 +81,11 @@ function scheduleNextSection() {
   const idx = get(currentSectionIndex);
 
   if (idx >= sections.length - 1) {
-    // Last section — end presentation, open consultation form
+    // Last section — end presentation, navigate to consultation page
     advanceTimer = window.setTimeout(() => {
       exitPresentation();
       setTimeout(() => {
-        if ((window as any).__openConsultation) {
-          (window as any).__openConsultation();
-        }
+        window.location.href = "/consultation";
       }, 500);
     }, 3000);
     return;

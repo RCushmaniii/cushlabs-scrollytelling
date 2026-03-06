@@ -1,8 +1,6 @@
 ---
 import { config } from "../../scrollytelling.config.ts";
 import "@/styles/base.css";
-import "@/styles/reveals.css";
-import "@/styles/reduced-motion.css";
 
 interface Props {
   title?: string;
@@ -40,28 +38,15 @@ const defaultLang = config.languages.find((l) => l.default)?.code ?? "en";
     >
     </style>
   </head>
-  <body data-active-lang={defaultLang} class="overlay-active">
-    <!-- Presentation overlay -->
-    <slot name="presentation-overlay" />
-
-    <!-- Fixed UI chrome: single navbar row -->
-    <slot name="progress-bar" />
+  <body data-active-lang={defaultLang}>
     <slot name="navbar" />
 
-    <!-- Main content -->
-    <main class="max-w-[1440px] mx-auto">
+    <main class="min-h-screen">
       <slot />
     </main>
 
-    <!-- Fixed bottom nav -->
-    <slot name="scroll-nav" />
+    <slot name="footer" />
 
-    <!-- Overlays -->
-    <slot name="grain" />
-    <slot name="lightbox" />
-    <slot name="modal" />
-
-    <!-- Scroll reveal initialization -->
     <script>
       import { initScrollReveals } from "@/lib/scroll";
       initScrollReveals();

@@ -9,9 +9,9 @@ import PresentationOverlay from "@/components/ui/PresentationOverlay.svelte";
 import Navbar from "@/components/ui/Navbar.svelte";
 import ProgressBar from "@/components/ui/ProgressBar.svelte";
 import ScrollNav from "@/components/ui/ScrollNav.svelte";
-import ConsultationForm from "@/components/ui/ConsultationForm.svelte";
 import Lightbox from "@/components/ui/Lightbox.svelte";
 import ShareButtons from "@/components/ui/ShareButtons.svelte";
+import Footer from "@/components/ui/Footer.svelte";
 
 const sections = (await getCollection("sections")).sort(
   (a, b) => a.data.order - b.data.order
@@ -25,7 +25,6 @@ const sections = (await getCollection("sections")).sort(
   <ScrollNav slot="scroll-nav" client:load />
   <GrainOverlay slot="grain" />
   <Lightbox slot="lightbox" client:load />
-  <ConsultationForm slot="consultation" client:load />
 
   <Fireflies />
 
@@ -51,23 +50,19 @@ const sections = (await getCollection("sections")).sort(
     );
   })}
 
-  <!-- Footer -->
-  <footer class="py-12 px-6 text-center border-t border-white/5">
-    <div class="max-w-md mx-auto space-y-6">
-      <p class="text-sm text-[var(--color-text-muted)]">
-        <span data-lang="en" class="active">Share this presentation</span>
-        <span data-lang="es">Comparte esta presentacion</span>
-      </p>
-      <div class="flex justify-center">
-        <ShareButtons
-          client:visible
-          titleEn="CushLabs builds cinematic scrollytelling presentations — check this out"
-          titleEs="CushLabs construye presentaciones cinematograficas de scrollytelling — mira esto"
-        />
-      </div>
-      <p class="text-xs text-[var(--color-text-muted)] opacity-40 pt-4">
-        &copy; 2026 CushLabs AI Services. All rights reserved.
-      </p>
+  <!-- Share + Footer -->
+  <div class="py-12 px-6 text-center">
+    <p class="text-sm text-[var(--color-text-muted)] mb-4">
+      <span data-lang="en" class="active">Share this presentation</span>
+      <span data-lang="es">Comparte esta presentacion</span>
+    </p>
+    <div class="flex justify-center">
+      <ShareButtons
+        client:visible
+        titleEn="CushLabs builds cinematic scrollytelling presentations — check this out"
+        titleEs="CushLabs construye presentaciones cinematograficas de scrollytelling — mira esto"
+      />
     </div>
-  </footer>
+  </div>
+  <Footer client:visible />
 </ScrollytellingLayout>
