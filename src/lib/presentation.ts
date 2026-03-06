@@ -135,6 +135,7 @@ function scheduleNextSection() {
 
 export function startPresentation() {
   presentationState.set("presenting");
+  document.body.classList.remove("overlay-active");
   document.body.classList.add("presentation-active");
 
   // Scroll to top
@@ -168,6 +169,7 @@ export function exitPresentation() {
 
 export function viewSiteMode() {
   presentationState.set("browsing");
+  document.body.classList.remove("overlay-active");
   document.body.classList.remove("presentation-active");
 
   // Trigger hero animation
@@ -180,6 +182,7 @@ export function resetToOverlay() {
   stopAll();
   unlockScroll();
   document.body.classList.remove("presentation-active");
+  document.body.classList.add("overlay-active");
   window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   presentationState.set("overlay");
 

@@ -40,7 +40,7 @@ const defaultLang = config.languages.find((l) => l.default)?.code ?? "en";
     >
     </style>
   </head>
-  <body data-active-lang={defaultLang}>
+  <body data-active-lang={defaultLang} class="overlay-active">
     <!-- Presentation overlay -->
     <slot name="presentation-overlay" />
 
