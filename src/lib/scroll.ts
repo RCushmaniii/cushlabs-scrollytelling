@@ -1,6 +1,7 @@
 import { config } from "../../scrollytelling.config.ts";
 
-/** Initialize IntersectionObserver for all .reveal elements */
+/** Initialize IntersectionObserver for all .reveal elements.
+ *  Reveals are repeatable — elements animate in when visible and reset when scrolled out. */
 export function initScrollReveals() {
   if (typeof window === "undefined") return;
 
@@ -11,7 +12,8 @@ export function initScrollReveals() {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add("visible");
-          observer.unobserve(entry.target);
+        } else {
+          entry.target.classList.remove("visible");
         }
       });
     },
@@ -22,6 +24,32 @@ export function initScrollReveals() {
     ".reveal, .reveal-left, .reveal-right, .reveal-scale"
   );
   revealElements.forEach((el) => observer.observe(el));
+}
+
+/** Initialize staggered reveal for children within a container */
+export function initStaggeredReveals(
+  containerSelector: string,
+  childSelector: string
+) {
+  if (typeof window === "undefined") return;
+
+  const containers = document.querySelectorAll(containerSelector);
+  containers.forEach((container) => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const children = entry.target.querySelectorAll(childSelector);
+          if (entry.isIntersecting) {
+            children.forEach((el) => el.classList.add("visible"));
+          } else {
+            children.forEach((el) => el.classList.remove("visible"));
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(container);
+  });
 }
 
 /** Calculate scroll progress (0–1) for the entire page */

@@ -28,11 +28,51 @@
     line-height: 1.2;
   }
 
-  /* Hide content for non-active language */
+  /* Bilingual content toggle via body[data-active-lang] */
   [data-lang] {
     display: none;
   }
   [data-lang].active {
     display: block;
+  }
+
+  /* CSS-based language toggle (works without JS for initial load) */
+  body[data-active-lang="en"] [data-lang="en"] {
+    display: block;
+  }
+  body[data-active-lang="en"] [data-lang="es"] {
+    display: none;
+  }
+  body[data-active-lang="es"] [data-lang="es"] {
+    display: block;
+  }
+  body[data-active-lang="es"] [data-lang="en"] {
+    display: none;
+  }
+
+  /* Allow inline lang spans inside paragraphs/headings */
+  h1 [data-lang], h2 [data-lang], h3 [data-lang],
+  p [data-lang], span [data-lang], a [data-lang],
+  button [data-lang], div [data-lang], cite [data-lang],
+  li [data-lang], blockquote [data-lang] {
+    display: none;
+  }
+  body[data-active-lang="en"] :is(h1, h2, h3, p, span, a, button, div, cite, li, blockquote) [data-lang="en"] {
+    display: inline;
+  }
+  body[data-active-lang="es"] :is(h1, h2, h3, p, span, a, button, div, cite, li, blockquote) [data-lang="es"] {
+    display: inline;
+  }
+
+  /* Presentation mode: hide scroll indicator during auto-play */
+  body.presentation-active .scroll-nav,
+  body.presentation-active .scroll-label {
+    display: none;
+  }
+
+  /* Focus indicators for accessibility */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 }

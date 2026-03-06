@@ -18,7 +18,9 @@
       (entries) => {
         if (entries[0].isIntersecting) {
           animateCount();
-          observer.disconnect();
+        } else {
+          // Reset when scrolled out so animation replays
+          display = "0";
         }
       },
       { threshold: 0.5 }

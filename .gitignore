@@ -7,6 +7,8 @@ dist/
 
 # environment
 .env
+.env.local
+.env.*.local
 .env.*
 !.env.example
 
@@ -21,3 +23,6 @@ Thumbs.db
 
 # astro
 .astro/
+
+# logs
+*.log

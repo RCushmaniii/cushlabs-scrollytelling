@@ -9,35 +9,66 @@ const { id, backgroundImage } = Astro.props;
 
 <section
   id={id}
-  class="relative w-full min-h-screen flex items-center justify-center overflow-hidden"
+  class="hero relative w-full min-h-screen flex items-center justify-center overflow-hidden"
 >
   {backgroundImage && (
     <div
-      class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+      class="hero-bg absolute inset-0 bg-cover bg-center bg-no-repeat md:bg-fixed"
       style={`background-image: url('${backgroundImage}')`}
     >
       <div class="absolute inset-0 bg-gradient-to-b from-[var(--color-background)]/60 via-[var(--color-background)]/40 to-[var(--color-background)]" />
     </div>
   )}
 
-  <div class="relative z-10 w-full max-w-5xl mx-auto px-6 text-center">
+  <div class="hero-text-container relative z-10 w-full max-w-5xl mx-auto px-6 text-center">
     <slot />
   </div>
-
-  <!-- Scroll indicator -->
-  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-float">
-    <svg
-      class="w-6 h-6 text-[var(--color-accent)] opacity-60"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M19 14l-7 7m0 0l-7-7m7 7V3"
-      />
-    </svg>
-  </div>
 </section>
+
+<style>
+  /* Hero background scale-in animation */
+  .hero-bg {
+    transform: scale(1.1);
+    animation: heroZoom 8s ease-out forwards;
+  }
+
+  @keyframes heroZoom {
+    to { transform: scale(1); }
+  }
+
+  /* Hero text animations — triggered when .hero-text-ready is added */
+  .hero-text-container :global(.hero-eyebrow) {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .hero-text-container :global(.hero-title) {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .hero-text-container :global(.hero-subtitle) {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  .hero-text-container.hero-text-ready :global(.hero-eyebrow) {
+    animation: fadeUp 1s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+  }
+  .hero-text-container.hero-text-ready :global(.hero-title) {
+    animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+  }
+  .hero-text-container.hero-text-ready :global(.hero-subtitle) {
+    animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.2s forwards;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mobile: disable fixed parallax */
+  @media (max-width: 768px) {
+    .hero-bg {
+      background-attachment: scroll !important;
+    }
+  }
+</style>

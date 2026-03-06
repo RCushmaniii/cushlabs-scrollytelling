@@ -40,6 +40,9 @@ const defaultLang = config.languages.find((l) => l.default)?.code ?? "en";
     </style>
   </head>
   <body data-active-lang={defaultLang}>
+    <!-- Presentation overlay (blocks everything until user chooses mode) -->
+    <slot name="presentation-overlay" />
+
     <!-- Fixed UI chrome -->
     <slot name="progress-bar" />
     <slot name="language-toggle" />
@@ -55,6 +58,7 @@ const defaultLang = config.languages.find((l) => l.default)?.code ?? "en";
 
     <!-- Overlays -->
     <slot name="grain" />
+    <slot name="lightbox" />
     <slot name="modal" />
 
     <!-- Scroll reveal initialization -->

@@ -5,11 +5,14 @@ import HeroSection from "@/components/sections/HeroSection.astro";
 import ContentSection from "@/components/sections/ContentSection.astro";
 import Fireflies from "@/components/effects/Fireflies.astro";
 import GrainOverlay from "@/components/effects/GrainOverlay.astro";
+import PresentationOverlay from "@/components/ui/PresentationOverlay.svelte";
 import LanguageToggle from "@/components/ui/LanguageToggle.svelte";
 import AudioToggle from "@/components/ui/AudioToggle.svelte";
 import ProgressBar from "@/components/ui/ProgressBar.svelte";
 import ScrollNav from "@/components/ui/ScrollNav.svelte";
 import CtaModal from "@/components/ui/CtaModal.svelte";
+import Lightbox from "@/components/ui/Lightbox.svelte";
+import ShareButtons from "@/components/ui/ShareButtons.svelte";
 
 const sections = (await getCollection("sections")).sort(
   (a, b) => a.data.order - b.data.order
@@ -17,11 +20,13 @@ const sections = (await getCollection("sections")).sort(
 ---
 
 <ScrollytellingLayout>
+  <PresentationOverlay slot="presentation-overlay" client:load />
   <ProgressBar slot="progress-bar" client:load />
   <LanguageToggle slot="language-toggle" client:load />
   <AudioToggle slot="audio-toggle" client:load />
   <ScrollNav slot="scroll-nav" client:load />
   <GrainOverlay slot="grain" />
+  <Lightbox slot="lightbox" client:load />
   <CtaModal slot="modal" client:load title="Get in Touch">
     <p class="text-[var(--color-text-muted)]">
       <span data-lang="en" class="active">We'd love to help you build your next pitch deck.</span>
@@ -52,4 +57,24 @@ const sections = (await getCollection("sections")).sort(
       </ContentSection>
     );
   })}
+
+  <!-- Footer with share buttons -->
+  <footer class="py-12 px-6 text-center border-t border-white/5">
+    <div class="max-w-md mx-auto space-y-6">
+      <p class="text-sm text-[var(--color-text-muted)]">
+        <span data-lang="en" class="active">Share this presentation</span>
+        <span data-lang="es">Comparte esta presentacion</span>
+      </p>
+      <div class="flex justify-center">
+        <ShareButtons
+          client:visible
+          titleEn="Check out this scrollytelling presentation by CushLabs"
+          titleEs="Mira esta presentacion de scrollytelling de CushLabs"
+        />
+      </div>
+      <p class="text-xs text-[var(--color-text-muted)] opacity-40 pt-4">
+        &copy; 2026 Robert Cushman. All rights reserved.
+      </p>
+    </div>
+  </footer>
 </ScrollytellingLayout>
