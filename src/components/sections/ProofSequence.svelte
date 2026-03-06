@@ -125,22 +125,15 @@
     running = true;
     const c = content[lang];
 
-    // Phase 1: Headline decodes
     schedule(() => {
       decodeText(c.headline, (chars) => (headlineChars = chars), 50, () => {
         headlineDone = true;
-
-        // Phase 2: Intro decodes
         schedule(() => {
           decodeText(c.intro, (chars) => (introChars = chars), 14, () => {
             introDone = true;
-
-            // Phase 3: Quote decodes
             schedule(() => {
               decodeText(c.quote, (chars) => (quoteChars = chars), 10, () => {
                 quoteDone = true;
-
-                // Phase 4: Attribution + demo
                 schedule(() => {
                   attributionVisible = true;
                   schedule(() => { demoVisible = true; }, 500);
@@ -170,15 +163,31 @@
 
     return () => { reset(); mutObs.disconnect(); intObs.disconnect(); };
   });
+
+  // Inline style helpers (Svelte scoped CSS stripped in Astro prod builds for MDX components)
+  function charStyle(done: boolean, type: 'headline' | 'text' | 'quote'): string {
+    const base = "transition:color 0.15s ease,text-shadow 0.2s ease;";
+    if (!done) {
+      return base + "font-family:var(--font-mono);color:color-mix(in srgb, var(--color-accent) 8%, transparent);text-shadow:none;";
+    }
+    switch (type) {
+      case 'headline':
+        return base + "color:var(--color-accent);text-shadow:0 0 30px color-mix(in srgb, var(--color-accent) 50%, transparent),0 0 60px color-mix(in srgb, var(--color-accent) 20%, transparent);";
+      case 'text':
+        return base + "color:var(--color-text);";
+      case 'quote':
+        return base + "color:var(--color-text);text-shadow:0 0 20px color-mix(in srgb, var(--color-accent) 10%, transparent);";
+    }
+  }
 </script>
 
 <div bind:this={el} class="space-y-10">
   <!-- Headline -->
   <div class="max-w-4xl">
-    <h2 class="headline-text">
+    <h2 style="font-family:var(--font-heading);font-size:clamp(1.875rem, 5vw, 3.75rem);font-weight:900;line-height:1.15;min-height:1.5em;color:var(--color-accent);">
       {#if headlineChars.length > 0}
         {#each headlineChars as { ch, done }}
-          <span class="decode-char" class:decoded-headline={done} class:binary={!done}>{ch}</span>
+          <span style={charStyle(done, 'headline')}>{ch}</span>
         {/each}
       {/if}
     </h2>
@@ -187,9 +196,9 @@
   <!-- Intro -->
   <div class="max-w-3xl min-h-[2em]">
     {#if introChars.length > 0}
-      <p class="text-xl md:text-2xl leading-relaxed text-[var(--color-text)]">
+      <p class="text-xl md:text-2xl leading-relaxed" style="color:var(--color-text);">
         {#each introChars as { ch, done }}
-          <span class="decode-char" class:decoded={done} class:binary={!done}>{ch}</span>
+          <span style={charStyle(done, 'text')}>{ch}</span>
         {/each}
       </p>
     {/if}
@@ -198,31 +207,34 @@
   <!-- Testimonial quote -->
   <div class="max-w-3xl mx-auto pt-6 min-h-[4em]">
     {#if quoteChars.length > 0}
-      <div class="quote-panel">
-        <div class="quote-bar"></div>
-        <blockquote class="text-xl md:text-2xl italic font-heading leading-relaxed pl-6">
+      <div style="position:relative;">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 30%, transparent));border-radius:2px;"></div>
+        <blockquote class="text-xl md:text-2xl italic leading-relaxed pl-6" style="font-family:var(--font-heading);">
           {#each quoteChars as { ch, done }}
-            <span class="decode-char" class:decoded-quote={done} class:binary={!done}>{ch}</span>
+            <span style={charStyle(done, 'quote')}>{ch}</span>
           {/each}
         </blockquote>
       </div>
     {/if}
 
     {#if attributionVisible}
-      <cite class="block mt-6 pl-6 text-sm text-[var(--color-text-muted)] not-italic attribution-fade">
+      <cite class="block mt-6 pl-6 text-sm not-italic" style="color:var(--color-text-muted);animation:fadeSlideUp 0.6s ease-out forwards;">
         {content[lang].attribution}
       </cite>
     {/if}
   </div>
 
   <!-- Demo callout -->
-  <div class="demo-card" class:demo-visible={demoVisible} class:demo-hidden={!demoVisible}>
+  <div style={demoVisible
+    ? "padding:1.5rem 2rem;border-radius:1rem;border:1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);background:color-mix(in srgb, var(--color-accent) 4%, transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:1;transform:translateY(0);transition:all 0.7s ease;"
+    : "padding:1.5rem 2rem;border-radius:1rem;border:1px solid transparent;background:transparent;opacity:0;transform:translateY(20px);transition:all 0.7s ease;"
+  }>
     <div class="flex flex-col md:flex-row md:items-center gap-6">
       <div class="flex-1">
-        <h3 class="font-heading text-xl font-bold text-[var(--color-text)] mb-2">
+        <h3 class="text-xl font-bold mb-2" style="font-family:var(--font-heading);color:var(--color-text);">
           {content[lang].demoTitle}
         </h3>
-        <p class="text-sm text-[var(--color-text-muted)] leading-relaxed">
+        <p class="text-sm leading-relaxed" style="color:var(--color-text-muted);">
           {content[lang].demoDesc}
         </p>
       </div>
@@ -230,7 +242,8 @@
         href="https://atlas-biodiversidad-pitch.vercel.app"
         target="_blank"
         rel="noopener noreferrer"
-        class="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-[var(--color-background)] font-semibold rounded-full transition-transform duration-300 hover:scale-105 text-sm"
+        class="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-full transition-transform duration-300 hover:scale-105 text-sm"
+        style="background:var(--color-accent);color:var(--color-background);"
       >
         {content[lang].demoCta}
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,81 +253,3 @@
     </div>
   </div>
 </div>
-
-<style>
-  /* Headline: bold gold with glow */
-  .headline-text {
-    font-family: var(--font-heading);
-    font-size: clamp(1.875rem, 5vw, 3.75rem);
-    font-weight: 900;
-    line-height: 1.15;
-    min-height: 1.5em;
-    color: var(--color-accent);
-  }
-
-  .decode-char {
-    transition: color 0.15s ease, text-shadow 0.2s ease;
-  }
-  .binary {
-    font-family: var(--font-mono);
-    color: color-mix(in srgb, var(--color-accent) 8%, transparent);
-    text-shadow: none;
-  }
-  .decoded-headline {
-    color: var(--color-accent);
-    text-shadow:
-      0 0 30px color-mix(in srgb, var(--color-accent) 50%, transparent),
-      0 0 60px color-mix(in srgb, var(--color-accent) 20%, transparent);
-  }
-  .decoded {
-    color: var(--color-text);
-  }
-  .decoded-quote {
-    color: var(--color-text);
-    text-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 10%, transparent);
-  }
-
-  /* Quote panel with gold left bar */
-  .quote-panel {
-    position: relative;
-  }
-  .quote-bar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: linear-gradient(180deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 30%, transparent));
-    border-radius: 2px;
-  }
-
-  .attribution-fade {
-    animation: fadeSlideUp 0.6s ease-out forwards;
-  }
-  @keyframes fadeSlideUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* Demo card */
-  .demo-card {
-    padding: 1.5rem 2rem;
-    border-radius: 1rem;
-    border: 1px solid transparent;
-    transition: all 0.7s ease;
-  }
-  .demo-hidden {
-    opacity: 0;
-    transform: translateY(20px);
-    border-color: transparent;
-    background: transparent;
-  }
-  .demo-visible {
-    opacity: 1;
-    transform: translateY(0);
-    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
-    background: color-mix(in srgb, var(--color-accent) 4%, transparent);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-</style>

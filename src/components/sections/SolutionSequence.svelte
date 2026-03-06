@@ -66,7 +66,6 @@
     const fontSize = 14;
     const rainChars = "01";
 
-    // Size canvas to match parent — and keep it synced as content animates in
     function resize() {
       const w = el.offsetWidth;
       const h = el.offsetHeight;
@@ -77,7 +76,6 @@
     }
     resize();
 
-    // Watch for size changes as decode animations expand the content
     resizeObs = new ResizeObserver(() => resize());
     resizeObs.observe(el);
 
@@ -88,7 +86,7 @@
     const accent = style.getPropertyValue("--color-accent").trim() || "#F5C542";
 
     let lastTime = 0;
-    const frameInterval = 110; // ~9fps — slow dreamy fall
+    const frameInterval = 110;
 
     function draw(timestamp: number) {
       if (!matrixRunning) return;
@@ -99,14 +97,12 @@
       }
       lastTime = timestamp;
 
-      // Very low opacity clear = very long trailing tails
       ctx.fillStyle = "rgba(10, 10, 10, 0.03)";
       ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
 
       ctx.font = `${fontSize}px monospace`;
 
       for (let i = 0; i < drops.length; i++) {
-        // ~50% of columns active for sparse look
         if (drops[i] === -999) {
           if (Math.random() > 0.997) drops[i] = Math.random() * -15;
           continue;
@@ -116,12 +112,10 @@
         const x = i * fontSize;
         const y = drops[i] * fontSize;
 
-        // Bright head character
         ctx.fillStyle = accent;
         ctx.globalAlpha = 0.2;
         ctx.fillText(char, x, y);
 
-        // Trail chars above the head — creates visible tail
         ctx.globalAlpha = 0.1;
         ctx.fillText(rainChars[Math.floor(Math.random() * 2)], x, y - fontSize);
         ctx.globalAlpha = 0.06;
@@ -129,10 +123,8 @@
         ctx.globalAlpha = 0.03;
         ctx.fillText(rainChars[Math.floor(Math.random() * 2)], x, y - fontSize * 3);
 
-        // Slow fall
         drops[i] += 0.4;
 
-        // Reset once past bottom
         if (drops[i] * fontSize > matrixCanvas.height) {
           if (Math.random() > 0.5) {
             drops[i] = Math.random() * -25;
@@ -249,19 +241,15 @@
     const c = content[lang];
     step = 1;
 
-    // Start matrix rain immediately as ambient background
     startMatrixRain();
 
-    // Headline decodes
     schedule(() => {
       decodeText(c.headline, (chars) => (headlineChars = chars), 55, () => {
         headlineDone = true;
-        // Intro decodes
         schedule(() => {
           step = 2;
           decodeText(c.intro, (chars) => (introChars = chars), 20, () => {
             introDone = true;
-            // Features decode
             schedule(() => { step = 3; decodeFeature(0, c); }, 800);
           });
         }, 700);
@@ -300,20 +288,47 @@
 
     return () => { reset(); mutObs.disconnect(); intObs.disconnect(); };
   });
+
+  // Inline style helpers (Svelte scoped CSS is stripped in Astro production builds for MDX-loaded components)
+  function charStyle(done: boolean, type: 'headline' | 'intro' | 'accent' | 'text'): string {
+    const base = "transition:color 0.15s ease,text-shadow 0.2s ease;";
+    if (!done) {
+      return base + "font-family:var(--font-mono);color:color-mix(in srgb, var(--color-accent) 8%, transparent);text-shadow:none;";
+    }
+    switch (type) {
+      case 'headline':
+        return base + "color:var(--color-accent);text-shadow:0 0 30px color-mix(in srgb, var(--color-accent) 50%, transparent),0 0 60px color-mix(in srgb, var(--color-accent) 20%, transparent);";
+      case 'intro':
+        return base + "color:var(--color-accent);text-shadow:0 0 20px color-mix(in srgb, var(--color-accent) 30%, transparent);";
+      case 'accent':
+        return base + "color:var(--color-accent);text-shadow:0 0 15px color-mix(in srgb, var(--color-accent) 25%, transparent);";
+      case 'text':
+        return base + "color:var(--color-text);";
+    }
+  }
+
+  function featureStyle(visible: boolean): string {
+    const base = "position:relative;overflow:hidden;padding:1.5rem;border-radius:0.75rem;border:1px solid transparent;transition:all 0.5s ease;";
+    if (!visible) {
+      return base + "opacity:0;transform:translateY(20px);border-color:transparent;background:transparent;";
+    }
+    return base + "opacity:1;transform:translateY(0);border-color:color-mix(in srgb, var(--color-accent) 30%, transparent);background:rgba(245,197,66,0.04);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);";
+  }
 </script>
 
-<div bind:this={el} class="solution-wrapper">
-  <!-- Matrix rain canvas — ABSOLUTE behind all content -->
-  <canvas bind:this={matrixCanvas} class="matrix-rain"></canvas>
+<div bind:this={el} style="position:relative;overflow:hidden;">
+  <canvas
+    bind:this={matrixCanvas}
+    style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;"
+  ></canvas>
 
-  <!-- All content sits above the canvas -->
-  <div class="content-layer">
+  <div style="position:relative;z-index:1;">
     <!-- Headline -->
     <div class="max-w-4xl mb-10">
-      <h2 class="headline-text">
+      <h2 style="font-family:var(--font-heading);font-size:clamp(1.875rem, 5vw, 3.75rem);font-weight:900;line-height:1.15;min-height:1.5em;color:var(--color-accent);">
         {#if headlineChars.length > 0}
           {#each headlineChars as { ch, done }}
-            <span class="decode-char" class:decoded-headline={done} class:binary={!done}>{ch}</span>
+            <span style={charStyle(done, 'headline')}>{ch}</span>
           {/each}
         {/if}
       </h2>
@@ -322,9 +337,9 @@
     <!-- Intro -->
     <div class="max-w-3xl min-h-[3em] mb-10">
       {#if introChars.length > 0}
-        <p class="intro-text">
+        <p style="font-size:clamp(1.25rem, 2.5vw, 1.5rem);line-height:1.6;font-weight:600;color:var(--color-accent);">
           {#each introChars as { ch, done }}
-            <span class="decode-char" class:decoded-intro={done} class:binary={!done}>{ch}</span>
+            <span style={charStyle(done, 'intro')}>{ch}</span>
           {/each}
         </p>
       {/if}
@@ -333,164 +348,30 @@
     <!-- Feature blocks -->
     <div class="space-y-4">
       {#each features as feature, idx}
-        <div class="feature-block" class:feature-visible={feature.visible} class:feature-hidden={!feature.visible}>
+        <div style={featureStyle(feature.visible)}>
           <div class="mb-2 min-h-[1.5em]">
             {#if feature.titleChars.length > 0}
-              <h3 class="feature-title">
+              <h3 style="font-family:var(--font-mono);font-size:clamp(0.8rem, 1.5vw, 1rem);letter-spacing:0.2em;color:var(--color-accent);">
                 {#each feature.titleChars as { ch, done }}
-                  <span class="decode-char" class:decoded-accent={done} class:binary={!done}>{ch}</span>
+                  <span style={charStyle(done, 'accent')}>{ch}</span>
                 {/each}
               </h3>
             {/if}
           </div>
           <div class="min-h-[1.5em]">
             {#if feature.descChars.length > 0}
-              <p class="feature-desc">
+              <p style="font-size:clamp(1rem, 1.8vw, 1.125rem);line-height:1.6;color:var(--color-text);">
                 {#each feature.descChars as { ch, done }}
-                  <span class="decode-char" class:decoded={done} class:binary={!done}>{ch}</span>
+                  <span style={charStyle(done, 'text')}>{ch}</span>
                 {/each}
               </p>
             {/if}
           </div>
           {#if feature.visible && feature.descChars.some(c => !c.done)}
-            <div class="scan-line"></div>
+            <div style="position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--color-accent),transparent);opacity:0.3;animation:scanMove 2.5s ease-in-out infinite;"></div>
           {/if}
         </div>
       {/each}
     </div>
   </div>
 </div>
-
-<style>
-  /* Wrapper must be position:relative so canvas can be absolute inside it */
-  .solution-wrapper {
-    position: relative;
-    overflow: hidden;
-  }
-
-  /* Canvas fills the entire wrapper, sits at z-0 BEHIND everything */
-  .matrix-rain {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  /* Content layer sits ABOVE the canvas */
-  .content-layer {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── Headline: BOLD GOLD, unmissable ── */
-  .headline-text {
-    font-family: var(--font-heading);
-    font-size: clamp(1.875rem, 5vw, 3.75rem);
-    font-weight: 900;
-    line-height: 1.15;
-    min-height: 1.5em;
-    color: var(--color-accent);
-  }
-
-  /* ── Intro: bold gold ── */
-  .intro-text {
-    font-size: clamp(1.25rem, 2.5vw, 1.5rem);
-    line-height: 1.6;
-    font-weight: 600;
-    color: var(--color-accent);
-  }
-
-  /* ── Feature title: mono, gold ── */
-  .feature-title {
-    font-family: var(--font-mono);
-    font-size: clamp(0.8rem, 1.5vw, 1rem);
-    letter-spacing: 0.2em;
-    color: var(--color-accent);
-  }
-
-  /* ── Feature description ── */
-  .feature-desc {
-    font-size: clamp(1rem, 1.8vw, 1.125rem);
-    line-height: 1.6;
-    color: var(--color-text);
-  }
-
-  /* Binary/undecoded characters — dim noise */
-  .decode-char {
-    transition: color 0.15s ease, text-shadow 0.2s ease;
-  }
-  .binary {
-    font-family: var(--font-mono);
-    color: color-mix(in srgb, var(--color-accent) 8%, transparent);
-    text-shadow: none;
-  }
-
-  /* Decoded headline chars — bright gold with glow */
-  .decoded-headline {
-    color: var(--color-accent);
-    text-shadow:
-      0 0 30px color-mix(in srgb, var(--color-accent) 50%, transparent),
-      0 0 60px color-mix(in srgb, var(--color-accent) 20%, transparent);
-  }
-
-  /* Decoded intro chars — gold */
-  .decoded-intro {
-    color: var(--color-accent);
-    text-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 30%, transparent);
-  }
-
-  /* Decoded feature descriptions — light text */
-  .decoded {
-    color: var(--color-text);
-    text-shadow: none;
-  }
-
-  /* Decoded feature titles — accent gold */
-  .decoded-accent {
-    color: var(--color-accent);
-    text-shadow: 0 0 15px color-mix(in srgb, var(--color-accent) 25%, transparent);
-  }
-
-  /* Feature blocks */
-  .feature-block {
-    position: relative;
-    overflow: hidden;
-    padding: 1.5rem;
-    border-radius: 0.75rem;
-    border: 1px solid transparent;
-    transition: all 0.5s ease;
-  }
-  .feature-hidden {
-    opacity: 0;
-    transform: translateY(20px);
-    border-color: transparent;
-    background: transparent;
-  }
-  .feature-visible {
-    opacity: 1;
-    transform: translateY(0);
-    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
-    background: rgba(245, 197, 66, 0.04);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-
-  /* Scan line */
-  .scan-line {
-    position: absolute;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
-    opacity: 0.3;
-    animation: scanMove 2.5s ease-in-out infinite;
-  }
-  @keyframes scanMove {
-    0% { top: 20%; }
-    50% { top: 80%; }
-    100% { top: 20%; }
-  }
-</style>
