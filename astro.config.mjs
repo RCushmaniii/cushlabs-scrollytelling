@@ -8,4 +8,15 @@ export default defineConfig({
   output: "static",
   adapter: vercel(),
   integrations: [svelte(), tailwind(), mdx()],
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            p5: ["p5"],
+          },
+        },
+      },
+    },
+  },
 });
