@@ -55,6 +55,8 @@
     },
   };
 
+  let resizeObs: ResizeObserver | null = null;
+
   // ── Matrix Rain (canvas) ──
   function startMatrixRain() {
     if (!matrixCanvas || matrixRunning) return;
@@ -64,44 +66,49 @@
     const fontSize = 14;
     const rainChars = "01";
 
-    // Size canvas to match parent element
+    // Size canvas to match parent — and keep it synced as content animates in
     function resize() {
-      matrixCanvas.width = el.offsetWidth;
-      matrixCanvas.height = el.offsetHeight;
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      if (matrixCanvas.width !== w || matrixCanvas.height !== h) {
+        matrixCanvas.width = w;
+        matrixCanvas.height = h;
+      }
     }
     resize();
 
+    // Watch for size changes as decode animations expand the content
+    resizeObs = new ResizeObserver(() => resize());
+    resizeObs.observe(el);
+
     const columns = Math.floor(matrixCanvas.width / fontSize);
-    // Stagger initial positions so columns start at different heights
     const drops: number[] = Array.from({ length: columns }, () => Math.random() * -40);
 
-    // Parse accent color
     const style = getComputedStyle(el);
     const accent = style.getPropertyValue("--color-accent").trim() || "#F5C542";
 
     let lastTime = 0;
-    const frameInterval = 80; // ~12fps — slow, deliberate fall like the movie
+    const frameInterval = 110; // ~9fps — slow dreamy fall
 
     function draw(timestamp: number) {
       if (!matrixRunning) return;
 
-      // Throttle to ~12fps for slow cinematic fall
       if (timestamp - lastTime < frameInterval) {
         matrixRaf = requestAnimationFrame(draw);
         return;
       }
       lastTime = timestamp;
 
-      // Trail fade — higher = longer trails. 0.05 gives nice long tails
-      ctx.fillStyle = "rgba(10, 10, 10, 0.05)";
+      // Very low opacity clear = very long trailing tails
+      ctx.fillStyle = "rgba(10, 10, 10, 0.03)";
       ctx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
 
       ctx.font = `${fontSize}px monospace`;
 
       for (let i = 0; i < drops.length; i++) {
-        // Only ~60% of columns active at any time for sparse look
+        // ~50% of columns active for sparse look
         if (drops[i] === -999) {
-          if (Math.random() > 0.995) drops[i] = Math.random() * -10;
+          if (Math.random() > 0.997) drops[i] = Math.random() * -15;
           continue;
         }
 
@@ -109,27 +116,28 @@
         const x = i * fontSize;
         const y = drops[i] * fontSize;
 
-        // Bright head character — the "leading drop"
+        // Bright head character
         ctx.fillStyle = accent;
-        ctx.globalAlpha = 0.25;
+        ctx.globalAlpha = 0.2;
         ctx.fillText(char, x, y);
 
-        // Slightly dimmer character just above (part of the trail)
-        ctx.globalAlpha = 0.12;
+        // Trail chars above the head — creates visible tail
+        ctx.globalAlpha = 0.1;
         ctx.fillText(rainChars[Math.floor(Math.random() * 2)], x, y - fontSize);
-
         ctx.globalAlpha = 0.06;
         ctx.fillText(rainChars[Math.floor(Math.random() * 2)], x, y - fontSize * 2);
+        ctx.globalAlpha = 0.03;
+        ctx.fillText(rainChars[Math.floor(Math.random() * 2)], x, y - fontSize * 3);
 
-        // Move drop down
-        drops[i] += 0.6; // Slow fall speed
+        // Slow fall
+        drops[i] += 0.4;
 
-        // Reset: once past bottom, either pause or restart from top
+        // Reset once past bottom
         if (drops[i] * fontSize > matrixCanvas.height) {
-          if (Math.random() > 0.4) {
-            drops[i] = Math.random() * -20; // Restart from above viewport
+          if (Math.random() > 0.5) {
+            drops[i] = Math.random() * -25;
           } else {
-            drops[i] = -999; // Pause this column
+            drops[i] = -999;
           }
         }
       }
@@ -146,6 +154,10 @@
     if (matrixRaf !== null) {
       cancelAnimationFrame(matrixRaf);
       matrixRaf = null;
+    }
+    if (resizeObs) {
+      resizeObs.disconnect();
+      resizeObs = null;
     }
   }
 
@@ -460,8 +472,10 @@
   .feature-visible {
     opacity: 1;
     transform: translateY(0);
-    border-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
-    background: color-mix(in srgb, var(--color-accent) 3%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    background: rgba(245, 197, 66, 0.04);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 
   /* Scan line */
