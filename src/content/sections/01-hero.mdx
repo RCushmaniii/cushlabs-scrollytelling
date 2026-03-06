@@ -10,21 +10,6 @@ subtitle:
   es: "Presentaciones cinematograficas de scrollytelling por CushLabs"
 ---
 
-<div class="space-y-6">
-  <div class="hero-eyebrow mb-4">
-    <span class="font-mono text-xs tracking-[0.4em] uppercase text-[var(--color-accent)] opacity-70">
-      <span data-lang="en" class="active">CushLabs AI Services</span>
-      <span data-lang="es">CushLabs AI Services</span>
-    </span>
-  </div>
+import HeroSequence from "@/components/sections/HeroSequence.svelte";
 
-  <h1 class="hero-title font-heading text-5xl md:text-7xl lg:text-8xl font-black leading-[0.9] tracking-tight">
-    <span data-lang="en" class="active">Your Story,<br/><span class="text-[var(--color-accent)]">Unforgettable</span></span>
-    <span data-lang="es">Tu Historia,<br/><span class="text-[var(--color-accent)]">Inolvidable</span></span>
-  </h1>
-
-  <p class="hero-subtitle text-lg md:text-xl text-[var(--color-text-muted)] max-w-2xl mx-auto">
-    <span data-lang="en" class="active">We build cinematic scrollytelling presentations that make investors, partners, and audiences lean in — not tune out.</span>
-    <span data-lang="es">Construimos presentaciones cinematograficas de scrollytelling que hacen que inversores, socios y audiencias se inclinen hacia adelante — no se desconecten.</span>
-  </p>
-</div>
+<HeroSequence client:load />
