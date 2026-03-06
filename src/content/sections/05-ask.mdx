@@ -2,54 +2,12 @@
 order: 5
 id: ask
 type: content
-number: "Let's Talk"
+number: ""
 title:
   en: "Let's Talk"
   es: "Hablemos"
 ---
 
-import ObfuscatedEmail from "@/components/ui/ObfuscatedEmail.svelte";
+import AskSequence from "@/components/sections/AskSequence.svelte";
 
-<div class="space-y-8 text-center max-w-3xl mx-auto">
-  <h2 class="reveal reveal-delay-2 font-heading text-3xl md:text-5xl font-bold leading-tight">
-    <span data-lang="en" class="active">Ready to make your audience <span class="text-[var(--color-accent)] whitespace-nowrap">lean&nbsp;in</span>?</span>
-    <span data-lang="es">Listo para que tu audiencia <span class="text-[var(--color-accent)] whitespace-nowrap">se&nbsp;incline</span>?</span>
-  </h2>
-
-  <div class="reveal reveal-delay-3">
-    <p class="text-lg text-[var(--color-text-muted)] leading-relaxed">
-      <span data-lang="en" class="active">
-        Every project starts with a free consultation. We'll learn about your story, your audience,
-        and your goals — then show you exactly how scrollytelling can deliver the impact you need.
-      </span>
-      <span data-lang="es">
-        Cada proyecto comienza con una consulta gratuita. Conoceremos tu historia, tu audiencia
-        y tus objetivos — y luego te mostraremos exactamente como el scrollytelling puede entregar
-        el impacto que necesitas.
-      </span>
-    </p>
-  </div>
-
-  <div class="reveal reveal-delay-4 flex flex-col sm:flex-row gap-4 justify-center pt-6">
-    <a
-      href="/consultation"
-      class="inline-flex items-center justify-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-background)] font-semibold rounded-full transition-transform duration-300 hover:scale-105"
-    >
-      <span data-lang="en" class="active">Book a Free Consultation</span>
-      <span data-lang="es">Reserva una Consulta Gratuita</span>
-    </a>
-    <a
-      href="/contact"
-      class="inline-flex items-center justify-center gap-2 px-8 py-3 border-2 border-[var(--color-accent)] text-[var(--color-accent)] font-semibold rounded-full transition-all duration-300 hover:bg-[var(--color-accent)] hover:text-[var(--color-background)]"
-    >
-      <span data-lang="en" class="active">Send a Message</span>
-      <span data-lang="es">Enviar un Mensaje</span>
-    </a>
-  </div>
-
-  <div class="reveal reveal-delay-5 pt-12 pb-4">
-    <p class="text-sm text-[var(--color-text-muted)] opacity-60">
-      <ObfuscatedEmail client:load />
-    </p>
-  </div>
-</div>
+<AskSequence client:visible />

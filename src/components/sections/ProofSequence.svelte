@@ -2,14 +2,13 @@
   import { onMount } from "svelte";
 
   let el: HTMLDivElement;
-  let canvasContainer: HTMLDivElement;
-  let p5Instance: any = null;
   let lang = $state("en");
-  let step = $state(0);
   let running = $state(false);
   let timeouts: ReturnType<typeof setTimeout>[] = [];
 
-  // Testimonial decode state
+  // Animation states
+  let headlineChars = $state<{ ch: string; done: boolean }[]>([]);
+  let headlineDone = $state(false);
   let introChars = $state<{ ch: string; done: boolean }[]>([]);
   let introDone = $state(false);
   let quoteChars = $state<{ ch: string; done: boolean }[]>([]);
@@ -51,9 +50,7 @@
   };
 
   function schedule(fn: () => void, ms: number) {
-    const id = setTimeout(() => {
-      if (running) fn();
-    }, ms);
+    const id = setTimeout(() => { if (running) fn(); }, ms);
     timeouts.push(id);
     return id;
   }
@@ -113,198 +110,47 @@
     timeouts.forEach(clearTimeout);
     timeouts = [];
     running = false;
-    step = 0;
+    headlineChars = [];
+    headlineDone = false;
     introChars = [];
     introDone = false;
     quoteChars = [];
     quoteDone = false;
     attributionVisible = false;
     demoVisible = false;
-    if (p5Instance) {
-      p5Instance.remove();
-      p5Instance = null;
-    }
   }
 
-  async function startSequence() {
+  function startSequence() {
     reset();
     running = true;
-    step = 1;
-
     const c = content[lang];
 
-    // Launch P5.js 3D headline
-    const p5Module = await import("p5");
-    const P5 = p5Module.default;
-
-    interface Particle {
-      tx: number; ty: number;
-      sx: number; sy: number; sz: number;
-      delay: number;
-    }
-
-    p5Instance = new P5((p: any) => {
-      let font: any;
-      let points: Particle[] = [];
-      let startTime = 0;
-      let fontSize = 56;
-      let assembled = false;
-      let canvasW = 0;
-      let canvasH = 0;
-
-      const ASSEMBLE_DURATION = 2800;
-      const ASSEMBLE_STAGGER = 1800;
-
-      p.preload = () => {
-        font = p.loadFont("/fonts/PlayfairDisplay-Black.ttf");
-      };
-
-      p.setup = () => {
-        canvasW = canvasContainer.clientWidth;
-        canvasH = Math.min(420, canvasW * 0.55);
-        const canvas = p.createCanvas(canvasW, canvasH, p.WEBGL);
-        canvas.parent(canvasContainer);
-        canvas.style("display", "block");
-        p.pixelDensity(Math.min(window.devicePixelRatio, 2));
-        buildPoints();
-        startTime = p.millis();
-      };
-
-      function buildPoints() {
-        fontSize = Math.max(28, Math.min(canvasW * 0.055, 64));
-        p.textFont(font);
-        p.textSize(fontSize);
-
-        const headline = c.headline;
-        const bounds = font.textBounds(headline, 0, 0, fontSize);
-        const rawPts = font.textToPoints(headline, -bounds.w / 2, bounds.h / 3, fontSize, {
-          sampleFactor: 0.15,
-        });
-
-        points = rawPts.map((pt: { x: number; y: number }, i: number) => {
-          const angle = (i / rawPts.length) * Math.PI * 10;
-          const r = 400 + Math.random() * 800;
-          return {
-            tx: pt.x,
-            ty: pt.y,
-            sx: Math.cos(angle) * r * (Math.random() > 0.5 ? 1 : -1),
-            sy: Math.sin(angle) * r * 0.6,
-            sz: -300 - Math.random() * 1200,
-            delay: (i / rawPts.length) * ASSEMBLE_STAGGER + Math.random() * 200,
-          };
-        });
-      }
-
-      p.draw = () => {
-        p.clear();
-        if (!running) return;
-
-        const elapsed = p.millis() - startTime;
-
-        // Subtle scene breathing
-        p.push();
-        p.rotateX(Math.sin(elapsed * 0.0003) * 0.04);
-        p.rotateY(Math.sin(elapsed * 0.0002) * 0.02);
-
-        // Draw particles
-        for (const pt of points) {
-          const t = Math.max(0, Math.min(1, (elapsed - pt.delay) / ASSEMBLE_DURATION));
-          const eased = 1 - Math.pow(1 - t, 3);
-
-          const x = p.lerp(pt.sx, pt.tx, eased);
-          const y = p.lerp(pt.sy, pt.ty, eased);
-          const z = p.lerp(pt.sz, 0, eased);
-
-          // Float after assembly
-          const float = t >= 1
-            ? Math.sin((elapsed * 0.001) + pt.delay * 0.003) * 2
-            : 0;
-
-          const alpha = Math.min(255, eased * 300 + 30);
-
-          // Glow layer
-          p.push();
-          p.translate(x, y + float, z);
-          p.noFill();
-          p.stroke(245, 197, 66, alpha * 0.2);
-          p.strokeWeight(5);
-          p.point(0, 0, 0);
-          p.pop();
-
-          // Core particle
-          p.push();
-          p.translate(x, y + float, z);
-          p.noFill();
-          p.stroke(245, 197, 66, alpha);
-          p.strokeWeight(eased < 1 ? 1.5 : 2.5);
-          p.point(0, 0, 0);
-          p.pop();
-        }
-
-        // Once assembled, fade in solid text behind particles
-        const allDone = elapsed > ASSEMBLE_STAGGER + ASSEMBLE_DURATION + 500;
-        if (allDone && !assembled) {
-          assembled = true;
-          // Trigger next phase
-          onP5Complete();
-        }
-
-        if (elapsed > ASSEMBLE_STAGGER + ASSEMBLE_DURATION) {
-          const fadeT = Math.min(1, (elapsed - ASSEMBLE_STAGGER - ASSEMBLE_DURATION) / 800);
-          p.push();
-          p.fill(245, 197, 66, fadeT * 220);
-          p.noStroke();
-          p.textFont(font);
-          p.textSize(fontSize);
-          p.textAlign(p.CENTER, p.CENTER);
-          p.text(c.headline, 0, 0);
-          p.pop();
-        }
-
-        p.pop();
-      };
-
-      p.windowResized = () => {
-        canvasW = canvasContainer.clientWidth;
-        canvasH = Math.min(420, canvasW * 0.55);
-        p.resizeCanvas(canvasW, canvasH);
-        buildPoints();
-        startTime = p.millis();
-        assembled = false;
-      };
-    });
-  }
-
-  function onP5Complete() {
-    if (!running) return;
-    const c = content[lang];
-    step = 2;
-
-    // Decode intro
+    // Phase 1: Headline decodes
     schedule(() => {
-      decodeText(c.intro, (chars) => (introChars = chars), 14, () => {
-        introDone = true;
+      decodeText(c.headline, (chars) => (headlineChars = chars), 50, () => {
+        headlineDone = true;
 
-        // Decode quote
+        // Phase 2: Intro decodes
         schedule(() => {
-          step = 3;
-          decodeText(c.quote, (chars) => (quoteChars = chars), 10, () => {
-            quoteDone = true;
+          decodeText(c.intro, (chars) => (introChars = chars), 14, () => {
+            introDone = true;
 
-            // Show attribution
+            // Phase 3: Quote decodes
             schedule(() => {
-              attributionVisible = true;
+              decodeText(c.quote, (chars) => (quoteChars = chars), 10, () => {
+                quoteDone = true;
 
-              // Show demo callout
-              schedule(() => {
-                step = 4;
-                demoVisible = true;
-              }, 500);
-            }, 300);
+                // Phase 4: Attribution + demo
+                schedule(() => {
+                  attributionVisible = true;
+                  schedule(() => { demoVisible = true; }, 500);
+                }, 300);
+              });
+            }, 500);
           });
         }, 500);
       });
-    }, 300);
+    }, 800);
   }
 
   onMount(() => {
@@ -312,45 +158,36 @@
 
     const mutObs = new MutationObserver(() => {
       const newLang = document.body.dataset.activeLang || "en";
-      if (newLang !== lang) {
-        lang = newLang;
-        if (running) startSequence();
-      }
+      if (newLang !== lang) { lang = newLang; if (running) startSequence(); }
     });
     mutObs.observe(document.body, { attributes: true, attributeFilter: ["data-active-lang"] });
 
-    const intObs = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          startSequence();
-        } else {
-          reset();
-        }
-      },
-      { threshold: 0.1 }
-    );
+    const intObs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) startSequence();
+      else reset();
+    }, { threshold: 0.1 });
     intObs.observe(el);
 
-    return () => {
-      reset();
-      mutObs.disconnect();
-      intObs.disconnect();
-    };
+    return () => { reset(); mutObs.disconnect(); intObs.disconnect(); };
   });
 </script>
 
 <div bind:this={el} class="space-y-10">
-  <!-- P5.js 3D headline canvas -->
-  <div bind:this={canvasContainer} class="w-full relative">
-    {#if step === 0}
-      <div class="h-[300px]"></div>
-    {/if}
+  <!-- Headline -->
+  <div class="max-w-4xl">
+    <h2 class="headline-text">
+      {#if headlineChars.length > 0}
+        {#each headlineChars as { ch, done }}
+          <span class="decode-char" class:decoded-headline={done} class:binary={!done}>{ch}</span>
+        {/each}
+      {/if}
+    </h2>
   </div>
 
-  <!-- Intro text -->
-  <div class="max-w-3xl min-h-[3em]">
+  <!-- Intro -->
+  <div class="max-w-3xl min-h-[2em]">
     {#if introChars.length > 0}
-      <p class="text-xl md:text-2xl leading-relaxed">
+      <p class="text-xl md:text-2xl leading-relaxed text-[var(--color-text)]">
         {#each introChars as { ch, done }}
           <span class="decode-char" class:decoded={done} class:binary={!done}>{ch}</span>
         {/each}
@@ -359,34 +196,33 @@
   </div>
 
   <!-- Testimonial quote -->
-  <div class="max-w-3xl mx-auto text-center pt-4 min-h-[4em]">
+  <div class="max-w-3xl mx-auto pt-6 min-h-[4em]">
     {#if quoteChars.length > 0}
-      <blockquote class="text-xl md:text-2xl italic font-heading leading-relaxed">
-        {#each quoteChars as { ch, done }}
-          <span class="decode-char" class:decoded-quote={done} class:binary={!done}>{ch}</span>
-        {/each}
-      </blockquote>
+      <div class="quote-panel">
+        <div class="quote-bar"></div>
+        <blockquote class="text-xl md:text-2xl italic font-heading leading-relaxed pl-6">
+          {#each quoteChars as { ch, done }}
+            <span class="decode-char" class:decoded-quote={done} class:binary={!done}>{ch}</span>
+          {/each}
+        </blockquote>
+      </div>
     {/if}
 
     {#if attributionVisible}
-      <cite class="block mt-6 text-sm text-[var(--color-text-muted)] not-italic attribution-fade">
+      <cite class="block mt-6 pl-6 text-sm text-[var(--color-text-muted)] not-italic attribution-fade">
         {content[lang].attribution}
       </cite>
     {/if}
   </div>
 
   <!-- Demo callout -->
-  <div
-    class="demo-callout p-6 md:p-8 rounded-2xl border transition-all duration-700"
-    class:demo-visible={demoVisible}
-    class:demo-hidden={!demoVisible}
-  >
+  <div class="demo-card" class:demo-visible={demoVisible} class:demo-hidden={!demoVisible}>
     <div class="flex flex-col md:flex-row md:items-center gap-6">
       <div class="flex-1">
         <h3 class="font-heading text-xl font-bold text-[var(--color-text)] mb-2">
           {content[lang].demoTitle}
         </h3>
-        <p class="text-sm text-[var(--color-text-muted)]">
+        <p class="text-sm text-[var(--color-text-muted)] leading-relaxed">
           {content[lang].demoDesc}
         </p>
       </div>
@@ -406,12 +242,29 @@
 </div>
 
 <style>
+  /* Headline: bold gold with glow */
+  .headline-text {
+    font-family: var(--font-heading);
+    font-size: clamp(1.875rem, 5vw, 3.75rem);
+    font-weight: 900;
+    line-height: 1.15;
+    min-height: 1.5em;
+    color: var(--color-accent);
+  }
+
   .decode-char {
-    transition: color 0.2s ease;
+    transition: color 0.15s ease, text-shadow 0.2s ease;
   }
   .binary {
     font-family: var(--font-mono);
-    color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+    color: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    text-shadow: none;
+  }
+  .decoded-headline {
+    color: var(--color-accent);
+    text-shadow:
+      0 0 30px color-mix(in srgb, var(--color-accent) 50%, transparent),
+      0 0 60px color-mix(in srgb, var(--color-accent) 20%, transparent);
   }
   .decoded {
     color: var(--color-text);
@@ -419,6 +272,20 @@
   .decoded-quote {
     color: var(--color-text);
     text-shadow: 0 0 20px color-mix(in srgb, var(--color-accent) 10%, transparent);
+  }
+
+  /* Quote panel with gold left bar */
+  .quote-panel {
+    position: relative;
+  }
+  .quote-bar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, var(--color-accent), color-mix(in srgb, var(--color-accent) 30%, transparent));
+    border-radius: 2px;
   }
 
   .attribution-fade {
@@ -429,6 +296,13 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* Demo card */
+  .demo-card {
+    padding: 1.5rem 2rem;
+    border-radius: 1rem;
+    border: 1px solid transparent;
+    transition: all 0.7s ease;
+  }
   .demo-hidden {
     opacity: 0;
     transform: translateY(20px);
@@ -438,7 +312,9 @@
   .demo-visible {
     opacity: 1;
     transform: translateY(0);
-    border-color: color-mix(in srgb, var(--color-accent) 20%, transparent);
-    background: color-mix(in srgb, var(--color-accent) 3%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+    background: color-mix(in srgb, var(--color-accent) 4%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 </style>
