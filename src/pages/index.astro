@@ -6,11 +6,10 @@ import ContentSection from "@/components/sections/ContentSection.astro";
 import Fireflies from "@/components/effects/Fireflies.astro";
 import GrainOverlay from "@/components/effects/GrainOverlay.astro";
 import PresentationOverlay from "@/components/ui/PresentationOverlay.svelte";
-import LanguageToggle from "@/components/ui/LanguageToggle.svelte";
-import AudioToggle from "@/components/ui/AudioToggle.svelte";
+import Navbar from "@/components/ui/Navbar.svelte";
 import ProgressBar from "@/components/ui/ProgressBar.svelte";
 import ScrollNav from "@/components/ui/ScrollNav.svelte";
-import CtaModal from "@/components/ui/CtaModal.svelte";
+import ConsultationForm from "@/components/ui/ConsultationForm.svelte";
 import Lightbox from "@/components/ui/Lightbox.svelte";
 import ShareButtons from "@/components/ui/ShareButtons.svelte";
 
@@ -22,17 +21,11 @@ const sections = (await getCollection("sections")).sort(
 <ScrollytellingLayout>
   <PresentationOverlay slot="presentation-overlay" client:load />
   <ProgressBar slot="progress-bar" client:load />
-  <LanguageToggle slot="language-toggle" client:load />
-  <AudioToggle slot="audio-toggle" client:load />
+  <Navbar slot="navbar" client:load />
   <ScrollNav slot="scroll-nav" client:load />
   <GrainOverlay slot="grain" />
   <Lightbox slot="lightbox" client:load />
-  <CtaModal slot="modal" client:load title="Get in Touch">
-    <p class="text-[var(--color-text-muted)]">
-      <span data-lang="en" class="active">We'd love to help you build your next pitch deck.</span>
-      <span data-lang="es">Nos encantaria ayudarte a construir tu proxima presentacion.</span>
-    </p>
-  </CtaModal>
+  <ConsultationForm slot="consultation" client:load />
 
   <Fireflies />
 
@@ -58,7 +51,7 @@ const sections = (await getCollection("sections")).sort(
     );
   })}
 
-  <!-- Footer with share buttons -->
+  <!-- Footer -->
   <footer class="py-12 px-6 text-center border-t border-white/5">
     <div class="max-w-md mx-auto space-y-6">
       <p class="text-sm text-[var(--color-text-muted)]">
@@ -68,12 +61,12 @@ const sections = (await getCollection("sections")).sort(
       <div class="flex justify-center">
         <ShareButtons
           client:visible
-          titleEn="Check out this scrollytelling presentation by CushLabs"
-          titleEs="Mira esta presentacion de scrollytelling de CushLabs"
+          titleEn="CushLabs builds cinematic scrollytelling presentations — check this out"
+          titleEs="CushLabs construye presentaciones cinematograficas de scrollytelling — mira esto"
         />
       </div>
       <p class="text-xs text-[var(--color-text-muted)] opacity-40 pt-4">
-        &copy; 2026 Robert Cushman. All rights reserved.
+        &copy; 2026 CushLabs AI Services. All rights reserved.
       </p>
     </div>
   </footer>

@@ -81,12 +81,14 @@ function scheduleNextSection() {
   const idx = get(currentSectionIndex);
 
   if (idx >= sections.length - 1) {
-    // Last section — end presentation, open CTA
+    // Last section — end presentation, open consultation form
     advanceTimer = window.setTimeout(() => {
-      if ((window as any).__openCtaModal) {
-        (window as any).__openCtaModal();
-      }
       exitPresentation();
+      setTimeout(() => {
+        if ((window as any).__openConsultation) {
+          (window as any).__openConsultation();
+        }
+      }, 500);
     }, 3000);
     return;
   }

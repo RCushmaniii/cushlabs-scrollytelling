@@ -2,52 +2,65 @@
 order: 2
 id: problem
 type: content
-number: "01"
-background: "linear-gradient(180deg, var(--color-background), var(--color-surface))"
+number: "The Problem"
 title:
   en: "The Problem"
   es: "El Problema"
 ---
 
-<div class="space-y-8">
-  <h2 class="reveal reveal-delay-2 font-heading text-3xl md:text-5xl font-bold">
-    <span data-lang="en" class="active">Static slides don't tell stories.</span>
-    <span data-lang="es">Las diapositivas estaticas no cuentan historias.</span>
-  </h2>
+import AnimatedCounter from "@/components/ui/AnimatedCounter.svelte";
+import TypeWriter from "@/components/ui/TypeWriter.svelte";
+
+<div class="space-y-12">
+  <div class="max-w-3xl">
+    <h2 class="reveal reveal-delay-2 font-heading text-3xl md:text-5xl font-bold leading-tight">
+      <span data-lang="en" class="active">Your pitch deck is <TypeWriter client:visible words={["forgotten", "skipped", "ignored", "generic"]} speed={70} pause={1800} /></span>
+      <span data-lang="es">Tu presentacion es <TypeWriter client:visible words={["olvidada", "ignorada", "generica", "aburrida"]} speed={70} pause={1800} /></span>
+    </h2>
+  </div>
 
   <div class="reveal reveal-delay-3 max-w-3xl">
     <p class="text-lg text-[var(--color-text-muted)] leading-relaxed">
       <span data-lang="en" class="active">
-        Traditional pitch decks are forgettable. Investors see hundreds of them.
-        The ones that win aren't just informative — they're <em class="text-[var(--color-accent)]">immersive</em>.
+        Investors see hundreds of decks a month. Most are 12 slides in a Google doc
+        that look exactly like the last 12 slides they saw. The ones that win funding
+        aren't just informative — they're <em class="text-[var(--color-accent)] not-italic font-semibold">experiences</em>.
       </span>
       <span data-lang="es">
-        Las presentaciones tradicionales son olvidables. Los inversores ven cientos de ellas.
-        Las que ganan no son solo informativas — son <em class="text-[var(--color-accent)]">inmersivas</em>.
+        Los inversores ven cientos de presentaciones al mes. La mayoria son 12 diapositivas
+        en un documento de Google que se ven exactamente como las ultimas 12 que vieron.
+        Las que ganan financiamiento no son solo informativas — son <em class="text-[var(--color-accent)] not-italic font-semibold">experiencias</em>.
       </span>
     </p>
   </div>
 
-  <div class="grid md:grid-cols-3 gap-6 pt-8">
-    <div class="reveal reveal-delay-4 bg-white/5 rounded-xl p-6 border border-white/5">
-      <div class="text-3xl font-heading font-bold text-[var(--color-accent)] mb-2">92%</div>
-      <p class="text-sm text-[var(--color-text-muted)]">
-        <span data-lang="en" class="active">of investors say storytelling influences their decision</span>
-        <span data-lang="es">de los inversores dicen que la narrativa influye en su decision</span>
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="reveal reveal-delay-4 bg-white/[0.03] rounded-xl p-6 border border-white/5">
+      <div class="text-3xl md:text-4xl text-[var(--color-accent)]">
+        <AnimatedCounter client:visible target={92} suffix="%" duration={1500} />
+      </div>
+      <p class="text-sm text-[var(--color-text-muted)] mt-3">
+        <span data-lang="en" class="active">of investors say storytelling influences their decision more than data alone</span>
+        <span data-lang="es">de los inversores dicen que la narrativa influye mas en su decision que solo los datos</span>
       </p>
     </div>
-    <div class="reveal reveal-delay-5 bg-white/5 rounded-xl p-6 border border-white/5">
-      <div class="text-3xl font-heading font-bold text-[var(--color-accent)] mb-2">5 sec</div>
-      <p class="text-sm text-[var(--color-text-muted)]">
-        <span data-lang="en" class="active">average attention span before a pitch is judged</span>
-        <span data-lang="es">tiempo promedio de atencion antes de que se juzgue una presentacion</span>
+    <div class="reveal reveal-delay-5 bg-white/[0.03] rounded-xl p-6 border border-white/5">
+      <div class="text-3xl md:text-4xl text-[var(--color-accent)]">
+        <AnimatedCounter client:visible target={5} duration={1000} />
+        <span class="text-lg font-body"> sec</span>
+      </div>
+      <p class="text-sm text-[var(--color-text-muted)] mt-3">
+        <span data-lang="en" class="active">average time before a pitch is judged — first impressions are the only impression</span>
+        <span data-lang="es">tiempo promedio antes de que se juzgue una presentacion — la primera impresion es la unica</span>
       </p>
     </div>
-    <div class="reveal reveal-delay-6 bg-white/5 rounded-xl p-6 border border-white/5">
-      <div class="text-3xl font-heading font-bold text-[var(--color-accent)] mb-2">3x</div>
-      <p class="text-sm text-[var(--color-text-muted)]">
-        <span data-lang="en" class="active">more engagement with interactive narratives vs slides</span>
-        <span data-lang="es">mas engagement con narrativas interactivas vs diapositivas</span>
+    <div class="reveal reveal-delay-6 bg-white/[0.03] rounded-xl p-6 border border-white/5">
+      <div class="text-3xl md:text-4xl text-[var(--color-accent)]">
+        <AnimatedCounter client:visible target={3} suffix="x" duration={1000} />
+      </div>
+      <p class="text-sm text-[var(--color-text-muted)] mt-3">
+        <span data-lang="en" class="active">more engagement with interactive narratives versus traditional slide decks</span>
+        <span data-lang="es">mas engagement con narrativas interactivas versus presentaciones tradicionales</span>
       </p>
     </div>
   </div>

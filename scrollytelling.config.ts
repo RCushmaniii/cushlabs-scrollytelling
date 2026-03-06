@@ -16,7 +16,7 @@ export const config = {
     secondary: "#1A6B4A",     // Emerald
     accent: "#F5C542",        // Gold
     background: "#0A0A0A",    // Near-black
-    surface: "#141414",       // Slightly lighter black
+    surface: "#0A0A0A",       // Same as background — no shade difference
     text: "#F0EDE6",          // Warm white
     textMuted: "#A0998C",     // Muted warm gray
   },

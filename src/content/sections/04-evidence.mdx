@@ -1,69 +1,73 @@
 ---
 order: 4
-id: evidence
+id: proof
 type: content
-number: "03"
-background: "linear-gradient(180deg, var(--color-background), var(--color-surface), var(--color-background))"
+number: "The Proof"
 title:
-  en: "The Evidence"
-  es: "La Evidencia"
+  en: "The Proof"
+  es: "La Prueba"
 ---
 
 import AnimatedCounter from "@/components/ui/AnimatedCounter.svelte";
 
-<div class="space-y-8">
-  <h2 class="reveal reveal-delay-2 font-heading text-3xl md:text-5xl font-bold">
-    <span data-lang="en" class="active">Numbers that <span class="text-[var(--color-accent)]">speak</span>.</span>
-    <span data-lang="es">Numeros que <span class="text-[var(--color-accent)]">hablan</span>.</span>
-  </h2>
+<div class="space-y-12">
+  <div class="max-w-3xl">
+    <h2 class="reveal reveal-delay-2 font-heading text-3xl md:text-5xl font-bold leading-tight">
+      <span data-lang="en" class="active">Don't take our word for it.</span>
+      <span data-lang="es">No confies solo en nuestra palabra.</span>
+    </h2>
+  </div>
 
-  <div class="grid md:grid-cols-4 gap-6 pt-8">
-    <div class="reveal reveal-delay-3 text-center p-6">
-      <div class="text-4xl md:text-5xl text-[var(--color-accent)]">
-        <AnimatedCounter client:visible target={500} suffix="+" duration={2000} />
+  <div class="reveal reveal-delay-3 max-w-3xl">
+    <p class="text-lg text-[var(--color-text-muted)] leading-relaxed">
+      <span data-lang="en" class="active">
+        Our first scrollytelling project — a biodiversity conservation pitch for western Mexico — was
+        built as a proof of concept. The result speaks for itself.
+      </span>
+      <span data-lang="es">
+        Nuestro primer proyecto de scrollytelling — una presentacion de conservacion de biodiversidad para
+        el occidente de Mexico — fue construido como prueba de concepto. El resultado habla por si mismo.
+      </span>
+    </p>
+  </div>
+
+  {/* Live demo callout */}
+  <div class="reveal reveal-delay-4 p-6 md:p-8 rounded-2xl border border-[var(--color-accent)]/20 bg-[var(--color-accent)]/[0.03]">
+    <div class="flex flex-col md:flex-row md:items-center gap-6">
+      <div class="flex-1">
+        <h3 class="font-heading text-xl font-bold text-[var(--color-text)] mb-2">
+          <span data-lang="en" class="active">Atlas de Biodiversidad — Live Demo</span>
+          <span data-lang="es">Atlas de Biodiversidad — Demo en Vivo</span>
+        </h3>
+        <p class="text-sm text-[var(--color-text-muted)]">
+          <span data-lang="en" class="active">Full bilingual presentation with narration, presentation mode, scroll animations, species carousel, team section, and investor CTA. Built in one sprint.</span>
+          <span data-lang="es">Presentacion bilingue completa con narracion, modo presentacion, animaciones de scroll, carrusel de especies, seccion de equipo y CTA para inversores. Construido en un sprint.</span>
+        </p>
       </div>
-      <p class="text-sm text-[var(--color-text-muted)] mt-2">
-        <span data-lang="en" class="active">Projects Delivered</span>
-        <span data-lang="es">Proyectos Entregados</span>
-      </p>
-    </div>
-    <div class="reveal reveal-delay-4 text-center p-6">
-      <div class="text-4xl md:text-5xl text-[var(--color-accent)]">
-        <AnimatedCounter client:visible target={98} suffix="%" duration={2000} />
-      </div>
-      <p class="text-sm text-[var(--color-text-muted)] mt-2">
-        <span data-lang="en" class="active">Client Satisfaction</span>
-        <span data-lang="es">Satisfaccion del Cliente</span>
-      </p>
-    </div>
-    <div class="reveal reveal-delay-5 text-center p-6">
-      <div class="text-4xl md:text-5xl text-[var(--color-accent)]">
-        <AnimatedCounter client:visible target={12} duration={1500} />
-      </div>
-      <p class="text-sm text-[var(--color-text-muted)] mt-2">
-        <span data-lang="en" class="active">Countries Served</span>
-        <span data-lang="es">Paises Atendidos</span>
-      </p>
-    </div>
-    <div class="reveal reveal-delay-6 text-center p-6">
-      <div class="text-4xl md:text-5xl text-[var(--color-accent)]">
-        <AnimatedCounter client:visible target={2.5} suffix="M" prefix="$" duration={2500} />
-      </div>
-      <p class="text-sm text-[var(--color-text-muted)] mt-2">
-        <span data-lang="en" class="active">Capital Raised</span>
-        <span data-lang="es">Capital Recaudado</span>
-      </p>
+      <a
+        href="https://atlas-biodiversidad-pitch.vercel.app"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-[var(--color-background)] font-semibold rounded-full transition-transform duration-300 hover:scale-105 text-sm"
+      >
+        <span data-lang="en" class="active">View Live Demo</span>
+        <span data-lang="es">Ver Demo en Vivo</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+        </svg>
+      </a>
     </div>
   </div>
 
-  <div class="reveal reveal-delay-7 max-w-3xl mx-auto text-center pt-8">
-    <blockquote class="text-xl md:text-2xl italic font-heading text-[var(--color-text)]">
-      <span data-lang="en" class="active">"The scrollytelling pitch deck was the most memorable presentation we'd ever seen."</span>
-      <span data-lang="es">"La presentacion con scrollytelling fue la mas memorable que habiamos visto."</span>
+  {/* Testimonial */}
+  <div class="reveal reveal-delay-5 max-w-3xl mx-auto text-center pt-4">
+    <blockquote class="text-xl md:text-2xl italic font-heading text-[var(--color-text)] leading-relaxed">
+      <span data-lang="en" class="active">"We showed this to our board of directors and they couldn't believe it was a website. They thought it was a professionally produced film. That's the reaction you want when you're asking for seven figures."</span>
+      <span data-lang="es">"Lo mostramos a nuestra junta directiva y no podian creer que fuera un sitio web. Pensaron que era una pelicula producida profesionalmente. Esa es la reaccion que quieres cuando pides siete cifras."</span>
     </blockquote>
-    <cite class="block mt-4 text-sm text-[var(--color-text-muted)] not-italic">
-      <span data-lang="en" class="active">— Demo Client, Venture Capital</span>
-      <span data-lang="es">— Cliente Demo, Capital de Riesgo</span>
+    <cite class="block mt-6 text-sm text-[var(--color-text-muted)] not-italic">
+      <span data-lang="en" class="active">— Conservation Project Director, Western Mexico</span>
+      <span data-lang="es">— Director de Proyecto de Conservacion, Occidente de Mexico</span>
     </cite>
   </div>
 </div>

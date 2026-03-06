@@ -1,0 +1,9 @@
+No confies solo en nuestra palabra.
+
+Nuestro primer proyecto de scrollytelling fue una presentacion de conservacion de biodiversidad para el occidente de Mexico. Fue construido como prueba de concepto. El resultado habla por si mismo.
+
+El Atlas de Biodiversidad es una presentacion bilingue completa con narracion, modo presentacion, animaciones de scroll, un carrusel de especies, una seccion de equipo y una llamada a la accion para inversores. Construido en un solo sprint.
+
+Cuando el director del proyecto lo mostro a su junta directiva, no podian creer que fuera un sitio web. Pensaron que era una pelicula producida profesionalmente.
+
+Esa es la reaccion que quieres cuando pides siete cifras.

@@ -1,0 +1,9 @@
+Don't take our word for it.
+
+Our first scrollytelling project was a biodiversity conservation pitch for western Mexico. It was built as a proof of concept. The result speaks for itself.
+
+The Atlas de Biodiversidad is a full bilingual presentation with narration, presentation mode, scroll animations, a species carousel, a team section, and an investor call to action. Built in a single sprint.
+
+When the project director showed it to their board, they couldn't believe it was a website. They thought it was a professionally produced film.
+
+That's the reaction you want when you're asking for seven figures.

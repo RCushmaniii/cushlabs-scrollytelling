@@ -20,6 +20,7 @@ const defaultLang = config.languages.find((l) => l.default)?.code ?? "en";
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href={config.fonts.googleFontsUrl} rel="stylesheet" />
@@ -40,15 +41,14 @@ const defaultLang = config.languages.find((l) => l.default)?.code ?? "en";
     </style>
   </head>
   <body data-active-lang={defaultLang}>
-    <!-- Presentation overlay (blocks everything until user chooses mode) -->
+    <!-- Presentation overlay -->
     <slot name="presentation-overlay" />
 
-    <!-- Fixed UI chrome -->
+    <!-- Fixed UI chrome: single navbar row -->
     <slot name="progress-bar" />
-    <slot name="language-toggle" />
-    <slot name="audio-toggle" />
+    <slot name="navbar" />
 
-    <!-- Main content (max-width prevents ultra-wide ping-pong on large monitors) -->
+    <!-- Main content -->
     <main class="max-w-[1440px] mx-auto">
       <slot />
     </main>
@@ -60,6 +60,7 @@ const defaultLang = config.languages.find((l) => l.default)?.code ?? "en";
     <slot name="grain" />
     <slot name="lightbox" />
     <slot name="modal" />
+    <slot name="consultation" />
 
     <!-- Scroll reveal initialization -->
     <script>

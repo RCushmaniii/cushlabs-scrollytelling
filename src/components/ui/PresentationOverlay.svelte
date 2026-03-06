@@ -5,7 +5,6 @@
     startPresentation,
     viewSiteMode,
   } from "@/lib/presentation";
-  import { languages } from "@/lib/i18n";
 
   let state = $state<"overlay" | "presenting" | "browsing">("overlay");
   let fadeOut = $state(false);
@@ -36,24 +35,24 @@
 
 {#if state === "overlay"}
   <div
-    class="presentation-overlay fixed inset-0 z-[300] flex items-center justify-center bg-[var(--color-background)]/90 backdrop-blur-sm"
+    class="presentation-overlay fixed inset-0 z-[300] flex items-center justify-center bg-[var(--color-background)]/95 backdrop-blur-sm"
     class:fade-out={fadeOut}
   >
     <div class="text-center px-6 max-w-2xl">
       <div class="mb-8 opacity-60">
         <span class="font-mono text-xs tracking-[0.4em] uppercase text-[var(--color-accent)]">
-          CushLabs Presents
+          CushLabs AI Services
         </span>
       </div>
 
       <h1 class="font-heading text-4xl md:text-6xl lg:text-7xl font-black mb-6 text-[var(--color-text)] leading-[1.1]">
-        <span data-lang="en" class="active">The Future<br/>Starts Here</span>
-        <span data-lang="es">El Futuro<br/>Comienza Aqui</span>
+        <span data-lang="en" class="active">Your Story,<br/><span class="text-[var(--color-accent)]">Unforgettable</span></span>
+        <span data-lang="es">Tu Historia,<br/><span class="text-[var(--color-accent)]">Inolvidable</span></span>
       </h1>
 
       <p class="text-lg text-[var(--color-text-muted)] mb-12 max-w-lg mx-auto">
-        <span data-lang="en" class="active">A cinematic scrollytelling experience</span>
-        <span data-lang="es">Una experiencia cinematografica de narrativa interactiva</span>
+        <span data-lang="en" class="active">Cinematic scrollytelling presentations that make audiences lean in</span>
+        <span data-lang="es">Presentaciones cinematograficas de scrollytelling que hacen que las audiencias se inclinen</span>
       </p>
 
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
@@ -80,18 +79,6 @@
       </div>
     </div>
   </div>
-{/if}
-
-{#if state === "presenting"}
-  <button
-    onclick={() => {
-      import("@/lib/presentation").then(m => m.exitPresentation());
-    }}
-    class="pres-exit-btn fixed top-14 right-4 z-50 px-4 py-2 text-xs font-medium bg-black/40 backdrop-blur-md rounded-full border border-white/10 text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
-  >
-    <span data-lang="en" class="active">Exit Presentation</span>
-    <span data-lang="es">Salir de Presentacion</span>
-  </button>
 {/if}
 
 <style>

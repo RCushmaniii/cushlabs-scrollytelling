@@ -1,0 +1,11 @@
+The solution is scrollytelling — pitch decks that feel like cinema.
+
+We don't hand you a template and wish you luck. CushLabs builds your scrollytelling presentation end-to-end — from narrative strategy to cinematic web experience — so your story lands with the weight it deserves.
+
+Presentation mode. One click, and your audience sits back to watch. Scroll locks, narration plays, sections auto-advance. No clicking, no fumbling.
+
+Bilingual by default. Toggle between English and Spanish instantly, in both browse and presentation modes. One site. Two audiences.
+
+Professional AI narration with ambient sound design. Each section has its own audio track in each language, with crossfade transitions between sections.
+
+And cinematic atmosphere. Film grain, parallax backgrounds, ambient particles, scroll-triggered animations. Every pixel choreographed to build emotional impact.
