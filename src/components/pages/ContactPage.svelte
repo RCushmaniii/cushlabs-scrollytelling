@@ -167,7 +167,7 @@
       </svg>
     </a>
   </div>
-  <p class="text-xs text-[var(--color-text-muted)] opacity-60">{i("reassurance")}</p>
+  <p class="text-sm text-[var(--color-text-muted)] opacity-60">{i("reassurance")}</p>
 </section>
 
 <!-- Contact Grid -->
@@ -207,7 +207,7 @@
           <div>
             <label for="phone" class="form-label">{i("phoneLabel")}</label>
             <input type="tel" id="phone" bind:value={phone} autocomplete="tel" class="form-input" />
-            <p class="text-xs text-[var(--color-text-muted)] mt-1.5 opacity-60">{i("phoneHint")}</p>
+            <p class="text-sm text-[var(--color-text-muted)] mt-1.5 opacity-60">{i("phoneHint")}</p>
           </div>
 
           <div>
@@ -274,19 +274,19 @@
       <!-- Info rows -->
       <div class="space-y-0 mb-6">
         <div class="flex items-center justify-between py-2.5 border-b border-white/5">
-          <span class="text-xs text-[var(--color-text-muted)]">{i("timezone")}</span>
-          <span class="text-xs text-[var(--color-text)]">{i("timezoneValue")}</span>
+          <span class="text-sm text-[var(--color-text-muted)]">{i("timezone")}</span>
+          <span class="text-sm text-[var(--color-text)]">{i("timezoneValue")}</span>
         </div>
         {#if emailAddr}
           <div class="flex items-center justify-between py-2.5">
-            <span class="text-xs text-[var(--color-text-muted)]">Email</span>
-            <span class="text-xs text-[var(--color-text)]">{emailAddr}</span>
+            <span class="text-sm text-[var(--color-text-muted)]">Email</span>
+            <span class="text-sm text-[var(--color-text)]">{emailAddr}</span>
           </div>
         {/if}
       </div>
 
       <hr class="border-white/5 mb-5" />
-      <p class="text-xs text-[var(--color-text-muted)] mb-2">{i("talkLive")}</p>
+      <p class="text-sm text-[var(--color-text-muted)] mb-2">{i("talkLive")}</p>
       <a href="/consultation" class="text-sm font-semibold text-[var(--color-accent)] hover:opacity-80 transition-opacity inline-flex items-center gap-1">
         {i("bookCall")}
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -309,7 +309,7 @@
   .form-label {
     display: block;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--color-text-muted);
     margin-bottom: 0.5rem;

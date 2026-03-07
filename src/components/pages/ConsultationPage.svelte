@@ -237,7 +237,7 @@
           <svg class="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
           </svg>
-          <p class="text-sm text-[var(--color-text-muted)] leading-relaxed">{item}</p>
+          <p class="text-base text-[var(--color-text-muted)] leading-relaxed">{item}</p>
         </div>
       {/each}
     </div>
@@ -263,11 +263,11 @@
       {#each [1, 2, 3] as s}
         <div class="flex items-center gap-2" class:opacity-40={s > step}>
           <div
-            class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-mono font-bold transition-colors {s <= step ? 'step-active' : 'step-inactive'}"
+            class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-mono font-bold transition-colors {s <= step ? 'step-active' : 'step-inactive'}"
           >
             {s}
           </div>
-          <span class="text-xs font-mono text-[var(--color-text-muted)] hidden sm:inline">
+          <span class="text-sm font-mono text-[var(--color-text-muted)] hidden sm:inline">
             {i(`step${s}`)}
           </span>
           {#if s < 3}
@@ -382,7 +382,7 @@
 
     <!-- Direct contact fallback -->
     <div class="text-center mt-8">
-      <p class="text-xs text-[var(--color-text-muted)] mb-2">{i("orReach")}</p>
+      <p class="text-sm text-[var(--color-text-muted)] mb-2">{i("orReach")}</p>
       <div class="flex items-center justify-center gap-4">
         {#if emailAddr}
           <a href="mailto:{emailAddr}" class="text-sm text-[var(--color-accent)] hover:opacity-80 transition-opacity">
@@ -418,7 +418,7 @@
 
   .card-label {
     font-family: var(--font-mono);
-    font-size: 0.7rem;
+    font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.12em;
@@ -436,7 +436,7 @@
   .form-label {
     display: block;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--color-text-muted);
     margin-bottom: 0.5rem;
