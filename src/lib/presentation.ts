@@ -6,12 +6,20 @@ export type PresentationState = "overlay" | "presenting" | "browsing";
 export const presentationState = writable<PresentationState>("overlay");
 export const currentSectionIndex = writable(0);
 
-/** Seconds to dwell on each section when no audio is available */
-const DWELL_TIME_MS = 9000;
+/** Default dwell time per section when no audio is available */
+const DEFAULT_DWELL_MS = 15000;
+/** Per-section overrides — content-heavy sections get more time */
+const SECTION_DWELL_MS: Record<string, number> = {
+  hero: 8000,       // Title + subtitle, short
+  problem: 14000,   // Typewriter text
+  solution: 20000,  // Headline animation + feature cards reveal
+  proof: 16000,     // Evidence / stats
+  ask: 18000,       // CTA with letter-slam + card animations
+};
 /** Pause between narration ending and scrolling to next section */
 const POST_NARRATION_PAUSE_MS = 1500;
 /** Time to wait after scrolling for animations to settle */
-const POST_SCROLL_SETTLE_MS = 1200;
+const POST_SCROLL_SETTLE_MS = 2000;
 /** Maximum time to wait for narration before force-advancing */
 const MAX_NARRATION_WAIT_MS = 60000;
 
@@ -165,8 +173,10 @@ async function runPresentation() {
       if (get(presentationState) !== "presenting") return;
       await sleep(POST_NARRATION_PAUSE_MS);
     } else {
-      // No audio — dwell for a fixed time to let animations play
-      await sleep(DWELL_TIME_MS);
+      // No audio — dwell based on section complexity
+      const sectionId = sections[i].id;
+      const dwell = SECTION_DWELL_MS[sectionId] ?? DEFAULT_DWELL_MS;
+      await sleep(dwell);
     }
   }
 
