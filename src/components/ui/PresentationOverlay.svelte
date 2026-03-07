@@ -5,12 +5,19 @@
     startPresentation,
     viewSiteMode,
   } from "@/lib/presentation";
-  import { currentLang } from "@/lib/i18n";
+  import { currentLang, languages } from "@/lib/i18n";
 
   let state = $state<"overlay" | "presenting" | "browsing">("overlay");
   let fadeOut = $state(false);
+  let activeLang = $state("en");
+
+  function switchLang(code: string) {
+    currentLang.set(code);
+  }
 
   onMount(() => {
+    currentLang.subscribe((lang) => { activeLang = lang; });
+
     presentationState.subscribe((s) => {
       if (s !== "overlay" && state === "overlay") {
         fadeOut = true;
@@ -93,6 +100,21 @@
           <span data-lang="es">Explorar Libremente</span>
         </button>
       </div>
+
+      <!-- Language toggle -->
+      <div class="mt-10 flex justify-center">
+        <div class="flex gap-0.5 bg-black/40 backdrop-blur-md rounded-full p-0.5 border border-white/10">
+          {#each languages as lang}
+            <button
+              class="lang-btn px-4 py-1.5 text-xs font-medium rounded-full transition-all duration-300"
+              class:active={activeLang === lang.code}
+              onclick={() => switchLang(lang.code)}
+            >
+              {lang.label}
+            </button>
+          {/each}
+        </div>
+      </div>
     </div>
   </div>
 {/if}
@@ -105,5 +127,15 @@
   .presentation-overlay.fade-out {
     opacity: 0;
     pointer-events: none;
+  }
+  .lang-btn {
+    color: var(--color-text-muted);
+  }
+  .lang-btn:hover {
+    color: var(--color-text);
+  }
+  .lang-btn.active {
+    background-color: var(--color-accent);
+    color: var(--color-background);
   }
 </style>
