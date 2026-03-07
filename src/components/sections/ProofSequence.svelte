@@ -276,7 +276,7 @@
         </p>
       </div>
       <a
-        href="https://atlas-biodiversidad-pitch.vercel.app"
+        href="https://biojalisco-pitch.vercel.app"
         target="_blank"
         rel="noopener noreferrer"
         class="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 font-semibold rounded-full transition-transform duration-300 hover:scale-105 text-sm"
