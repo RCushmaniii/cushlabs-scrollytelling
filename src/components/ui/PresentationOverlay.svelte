@@ -5,6 +5,7 @@
     startPresentation,
     viewSiteMode,
   } from "@/lib/presentation";
+  import { currentLang } from "@/lib/i18n";
 
   let state = $state<"overlay" | "presenting" | "browsing">("overlay");
   let fadeOut = $state(false);
@@ -23,10 +24,17 @@
       }
     });
 
-    // Auto-launch presentation mode from URL: ?mode=prez
+    // URL parameters: ?mode=prez&lang=es
     const params = new URLSearchParams(window.location.search);
+
+    // Set language from URL if provided
+    const langParam = params.get("lang");
+    if (langParam) {
+      currentLang.set(langParam);
+    }
+
+    // Auto-launch presentation mode
     if (params.get("mode") === "prez") {
-      // Brief delay for page to settle, then auto-start
       setTimeout(() => startPresentation(), 800);
     }
   });
