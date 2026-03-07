@@ -101,13 +101,13 @@
   }
 
   // --- Three.js star field (ported from reference) ---
-  // Canvas is positioned fixed to fill the entire viewport so stars
-  // extend beyond the section boundaries — no visible container edge.
+  // Canvas is positioned absolute within the section, clipped by overflow:hidden.
   function initStarField() {
     if (!bgCanvas || renderer) return;
 
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const rect = el.getBoundingClientRect();
+    const w = rect.width;
+    const h = rect.height;
 
     renderer = new THREE.WebGLRenderer({ canvas: bgCanvas, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -277,10 +277,11 @@
 
     const onResize = () => {
       if (renderer && (el as any).__camera) {
+        const r = el.getBoundingClientRect();
         const cam = (el as any).__camera as THREE.PerspectiveCamera;
-        cam.aspect = window.innerWidth / window.innerHeight;
+        cam.aspect = r.width / r.height;
         cam.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(r.width, r.height);
       }
     };
     window.addEventListener("resize", onResize);
@@ -339,12 +340,12 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
   bind:this={el}
-  style="position:relative;display:flex;align-items:center;justify-content:center;min-height:70vh;z-index:2;"
+  style="position:relative;display:flex;align-items:center;justify-content:center;min-height:70vh;z-index:2;overflow:hidden;"
 >
-  <!-- Three.js star field canvas — fixed fullscreen so stars extend beyond section -->
+  <!-- Three.js star field canvas — contained within section -->
   <canvas
     bind:this={bgCanvas}
-    style="position:fixed;inset:0;z-index:0;width:100vw;height:100vh;pointer-events:none;"
+    style="position:absolute;inset:0;z-index:0;width:100%;height:100%;pointer-events:none;"
   ></canvas>
 
   <!-- Glow wrapper (sits outside card) -->
