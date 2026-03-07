@@ -31,3 +31,6 @@ Thumbs.db
 audio/**/*.mp3
 audio/**/*.wav
 audio/**/*.ogg
+
+.vercel
+.env*.local
