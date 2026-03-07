@@ -22,6 +22,13 @@
         fadeOut = false;
       }
     });
+
+    // Auto-launch presentation mode from URL: ?mode=prez
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("mode") === "prez") {
+      // Brief delay for page to settle, then auto-start
+      setTimeout(() => startPresentation(), 800);
+    }
   });
 
   function handlePlay() {
