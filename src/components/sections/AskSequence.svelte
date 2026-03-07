@@ -267,10 +267,10 @@
         ? "display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;padding-top:0.5rem;opacity:1;transform:translateY(0);transition:all 0.6s ease;"
         : "display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;padding-top:0.5rem;opacity:0;transform:translateY(15px);transition:all 0.6s ease;"
       }>
-        <a href="/consultation" style="display:inline-flex;align-items:center;justify-content:center;padding:0.75rem 2rem;background:var(--color-accent);color:var(--color-background);font-weight:600;font-size:0.9375rem;border-radius:9999px;text-decoration:none;transition:transform 0.3s ease;">
+        <a href="/consultation" style="display:inline-flex;align-items:center;justify-content:center;padding:0.875rem 2.5rem;background:var(--color-accent);color:var(--color-background);font-weight:700;font-size:1rem;border-radius:9999px;text-decoration:none;transition:all 0.3s ease;box-shadow:0 0 25px color-mix(in srgb, var(--color-accent) 35%, transparent),0 0 50px color-mix(in srgb, var(--color-accent) 15%, transparent);">
           {content[lang].cta1}
         </a>
-        <a href="/contact" style="display:inline-flex;align-items:center;justify-content:center;padding:0.75rem 2rem;border:2px solid var(--color-accent);color:var(--color-accent);font-weight:600;font-size:0.9375rem;border-radius:9999px;text-decoration:none;transition:all 0.3s ease;">
+        <a href="/contact" style="display:inline-flex;align-items:center;justify-content:center;padding:0.75rem 2rem;border:1px solid color-mix(in srgb, var(--color-accent) 35%, transparent);color:color-mix(in srgb, var(--color-accent) 70%, var(--color-text-muted));font-weight:500;font-size:0.9375rem;border-radius:9999px;text-decoration:none;transition:all 0.3s ease;box-shadow:0 0 12px color-mix(in srgb, var(--color-accent) 10%, transparent);">
           {content[lang].cta2}
         </a>
       </div>
