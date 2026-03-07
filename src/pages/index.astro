@@ -12,6 +12,7 @@ import ScrollNav from "@/components/ui/ScrollNav.svelte";
 import Lightbox from "@/components/ui/Lightbox.svelte";
 import ShareButtons from "@/components/ui/ShareButtons.svelte";
 import Footer from "@/components/ui/Footer.svelte";
+import MatrixBackground from "@/components/effects/MatrixBackground.svelte";
 
 const sections = (await getCollection("sections")).sort(
   (a, b) => a.data.order - b.data.order
@@ -27,6 +28,7 @@ const sections = (await getCollection("sections")).sort(
   <Lightbox slot="lightbox" client:load />
 
   <Fireflies />
+  <MatrixBackground client:load />
 
   {sections.map(async (section) => {
     const { Content } = await section.render();
