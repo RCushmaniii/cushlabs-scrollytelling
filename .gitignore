@@ -26,3 +26,8 @@ Thumbs.db
 
 # logs
 *.log
+
+# generated audio files (keep scripts/prompts, ignore large binaries)
+audio/**/*.mp3
+audio/**/*.wav
+audio/**/*.ogg
