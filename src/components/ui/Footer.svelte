@@ -32,9 +32,10 @@
       github: "GitHub",
       linkedin: "LinkedIn",
       services: "Services",
-      scrollytelling: "Scrollytelling",
-      pitchDecks: "Pitch Decks",
-      dataStories: "Data Stories",
+      svcScrollytelling: "Scrollytelling Presentations",
+      svcPitches: "Investor & Stakeholder Pitches",
+      svcData: "Interactive Data Narratives",
+      svcNarration: "AI Narration & Sound Design",
       copyright: "CushLabs AI Services. All rights reserved.",
     },
     es: {
@@ -51,9 +52,10 @@
       github: "GitHub",
       linkedin: "LinkedIn",
       services: "Servicios",
-      scrollytelling: "Scrollytelling",
-      pitchDecks: "Pitch Decks",
-      dataStories: "Historias de Datos",
+      svcScrollytelling: "Presentaciones de Scrollytelling",
+      svcPitches: "Pitches para Inversores y Stakeholders",
+      svcData: "Narrativas Interactivas de Datos",
+      svcNarration: "Narracion IA y Diseno Sonoro",
       copyright: "CushLabs AI Services. Todos los derechos reservados.",
     },
   };
@@ -109,9 +111,10 @@
           {i("services")}
         </h4>
         <ul class="space-y-2.5">
-          <li><span class="text-sm text-[var(--color-text-muted)]">{i("scrollytelling")}</span></li>
-          <li><span class="text-sm text-[var(--color-text-muted)]">{i("pitchDecks")}</span></li>
-          <li><span class="text-sm text-[var(--color-text-muted)]">{i("dataStories")}</span></li>
+          <li><span class="text-sm text-[var(--color-text-muted)]">{i("svcScrollytelling")}</span></li>
+          <li><span class="text-sm text-[var(--color-text-muted)]">{i("svcPitches")}</span></li>
+          <li><span class="text-sm text-[var(--color-text-muted)]">{i("svcData")}</span></li>
+          <li><span class="text-sm text-[var(--color-text-muted)]">{i("svcNarration")}</span></li>
         </ul>
       </div>
 
