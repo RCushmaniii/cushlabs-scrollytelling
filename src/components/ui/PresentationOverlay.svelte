@@ -3,7 +3,6 @@
   import {
     presentationState,
     startPresentation,
-    exitPresentation,
     viewSiteMode,
   } from "@/lib/presentation";
 
@@ -33,9 +32,6 @@
     viewSiteMode();
   }
 
-  function handleExit() {
-    exitPresentation();
-  }
 </script>
 
 {#if state === "overlay"}
@@ -86,16 +82,6 @@
   </div>
 {/if}
 
-<!-- Exit button visible during presentation mode -->
-{#if state === "presenting"}
-  <button
-    onclick={handleExit}
-    class="fixed top-6 right-6 z-[400] px-4 py-2 text-xs font-mono tracking-wider uppercase bg-black/60 backdrop-blur-sm text-[var(--color-text-muted)] border border-white/10 rounded-full transition-all duration-300 hover:text-[var(--color-accent)] hover:border-[var(--color-accent)]/30"
-  >
-    <span data-lang="en" class="active">Exit Presentation</span>
-    <span data-lang="es">Salir de Presentacion</span>
-  </button>
-{/if}
 
 <style>
   .presentation-overlay {
