@@ -1,8 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { presentationState } from "@/lib/presentation";
 
   let el: HTMLDivElement;
   let lang = $state("en");
+  let presenting = $state(false);
   let running = $state(false);
   let timeouts: ReturnType<typeof setTimeout>[] = [];
 
@@ -14,6 +16,8 @@
   let quoteChars = $state<{ ch: string; done: boolean }[]>([]);
   let quoteDone = $state(false);
   let attributionVisible = $state(false);
+  let closingChars = $state<{ ch: string; done: boolean }[]>([]);
+  let closingDone = $state(false);
   let demoVisible = $state(false);
 
   const BINARY = "01";
@@ -23,26 +27,32 @@
   const content: Record<string, {
     headline: string;
     intro: string;
+    introPresenting: string;
     quote: string;
     attribution: string;
+    closing: string;
     demoTitle: string;
     demoDesc: string;
     demoCta: string;
   }> = {
     en: {
-      headline: "Don't take our word for it.",
-      intro: "Our first scrollytelling project was a biodiversity conservation pitch for western Mexico. Built as a proof of concept. The result speaks for itself.",
-      quote: '"They couldn\'t believe it was a website. They thought it was a professionally produced film. That\'s the reaction you want when you\'re asking for seven figures."',
+      headline: "But don't take our word for it.",
+      intro: "Our first scrollytelling project was a biodiversity conservation pitch for western Mexico — a real proposal to secure conservation funding. The result speaks for itself.",
+      introPresenting: "Our first scrollytelling project was a biodiversity conservation pitch for western Mexico — a real proposal to secure conservation funding.",
+      quote: '"They couldn\'t believe it was a website. They thought it was a professionally produced film. That\'s the reaction you want when you\'re asking for serious funding."',
       attribution: "— Conservation Project Director, Western Mexico",
+      closing: "What you're watching was built the same way. That's the level we deliver.",
       demoTitle: "Atlas de Biodiversidad — Live Demo",
       demoDesc: "Full bilingual presentation with narration, presentation mode, scroll animations, species carousel, team section, and investor CTA. Built in one sprint.",
       demoCta: "View Live Demo",
     },
     es: {
       headline: "No confies solo en nuestra palabra.",
-      intro: "Nuestro primer proyecto de scrollytelling fue una presentacion de conservacion de biodiversidad para el occidente de Mexico. Construido como prueba de concepto. El resultado habla por si mismo.",
-      quote: '"No podian creer que fuera un sitio web. Pensaron que era una pelicula producida profesionalmente. Esa es la reaccion que quieres cuando pides siete cifras."',
+      intro: "Nuestro primer proyecto de scrollytelling fue una presentacion de conservacion de biodiversidad para el occidente de Mexico — una propuesta real para asegurar financiamiento. El resultado habla por si mismo.",
+      introPresenting: "Nuestro primer proyecto de scrollytelling fue una presentacion de conservacion de biodiversidad para el occidente de Mexico — una propuesta real para asegurar financiamiento.",
+      quote: '"No podian creer que fuera un sitio web. Pensaron que era una pelicula producida profesionalmente. Esa es la reaccion que quieres cuando pides financiamiento serio."',
       attribution: "— Director de Proyecto de Conservacion, Occidente de Mexico",
+      closing: "Lo que estas viendo fue construido de la misma manera. Ese es el nivel que entregamos.",
       demoTitle: "Atlas de Biodiversidad — Demo en Vivo",
       demoDesc: "Presentacion bilingue completa con narracion, modo presentacion, animaciones de scroll, carrusel de especies, seccion de equipo y CTA para inversores. Construido en un sprint.",
       demoCta: "Ver Demo en Vivo",
@@ -117,6 +127,8 @@
     quoteChars = [];
     quoteDone = false;
     attributionVisible = false;
+    closingChars = [];
+    closingDone = false;
     demoVisible = false;
   }
 
@@ -124,19 +136,30 @@
     reset();
     running = true;
     const c = content[lang];
+    const introText = presenting ? c.introPresenting : c.intro;
 
     schedule(() => {
       decodeText(c.headline, (chars) => (headlineChars = chars), 50, () => {
         headlineDone = true;
         schedule(() => {
-          decodeText(c.intro, (chars) => (introChars = chars), 14, () => {
+          decodeText(introText, (chars) => (introChars = chars), 14, () => {
             introDone = true;
             schedule(() => {
               decodeText(c.quote, (chars) => (quoteChars = chars), 10, () => {
                 quoteDone = true;
                 schedule(() => {
                   attributionVisible = true;
-                  schedule(() => { demoVisible = true; }, 500);
+                  if (presenting) {
+                    // In presentation mode: show closing line instead of demo box
+                    schedule(() => {
+                      decodeText(c.closing, (chars) => (closingChars = chars), 14, () => {
+                        closingDone = true;
+                      });
+                    }, 500);
+                  } else {
+                    // In browse mode: show demo callout
+                    schedule(() => { demoVisible = true; }, 500);
+                  }
                 }, 300);
               });
             }, 500);
@@ -148,6 +171,8 @@
 
   onMount(() => {
     lang = document.body.dataset.activeLang || "en";
+
+    const unsub = presentationState.subscribe((s) => { presenting = s === "presenting"; });
 
     const mutObs = new MutationObserver(() => {
       const newLang = document.body.dataset.activeLang || "en";
@@ -161,7 +186,7 @@
     }, { threshold: 0.1 });
     intObs.observe(el);
 
-    return () => { reset(); mutObs.disconnect(); intObs.disconnect(); };
+    return () => { reset(); unsub(); mutObs.disconnect(); intObs.disconnect(); };
   });
 
   // Inline style helpers (Svelte scoped CSS stripped in Astro prod builds for MDX components)
@@ -224,7 +249,19 @@
     {/if}
   </div>
 
-  <!-- Demo callout -->
+  <!-- Closing line (presentation mode only) -->
+  {#if presenting && closingChars.length > 0}
+    <div class="max-w-3xl pt-6 min-h-[2em]">
+      <p class="text-xl md:text-2xl leading-relaxed" style="color:var(--color-text);">
+        {#each closingChars as { ch, done }}
+          <span style={charStyle(done, 'text')}>{ch}</span>
+        {/each}
+      </p>
+    </div>
+  {/if}
+
+  <!-- Demo callout (browse mode only) -->
+  {#if !presenting}
   <div style={demoVisible
     ? "padding:1.5rem 2rem;border-radius:1rem;border:1px solid color-mix(in srgb, var(--color-accent) 30%, transparent);background:color-mix(in srgb, var(--color-accent) 4%, transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:1;transform:translateY(0);transition:all 0.7s ease;"
     : "padding:1.5rem 2rem;border-radius:1rem;border:1px solid transparent;background:transparent;opacity:0;transform:translateY(20px);transition:all 0.7s ease;"
@@ -252,4 +289,5 @@
       </a>
     </div>
   </div>
+  {/if}
 </div>

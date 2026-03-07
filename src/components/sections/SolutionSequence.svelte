@@ -1,8 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { presentationState } from "@/lib/presentation";
 
   let el: HTMLElement;
   let lang = $state("en");
+  let presenting = $state(false);
   let step = $state(0);
   let running = $state(false);
   let timeouts: ReturnType<typeof setTimeout>[] = [];
@@ -163,6 +165,9 @@
 
   onMount(() => {
     lang = document.body.dataset.activeLang || "en";
+
+    const unsub = presentationState.subscribe((s) => { presenting = s === "presenting"; });
+
     const mutObs = new MutationObserver(() => {
       const newLang = document.body.dataset.activeLang || "en";
       if (newLang !== lang) { lang = newLang; if (running) startSequence(); }
@@ -175,7 +180,7 @@
     }, { threshold: 0.1 });
     intObs.observe(el);
 
-    return () => { reset(); mutObs.disconnect(); intObs.disconnect(); };
+    return () => { reset(); unsub(); mutObs.disconnect(); intObs.disconnect(); };
   });
 
   function charStyle(done: boolean, type: 'headline' | 'intro' | 'accent' | 'text'): string {
@@ -240,6 +245,7 @@
             </h3>
           {/if}
         </div>
+        {#if !presenting}
         <div class="min-h-[1.5em]">
           {#if feature.descChars.length > 0}
             <p style="font-size:clamp(1rem, 1.8vw, 1.125rem);line-height:1.6;color:var(--color-text);">
@@ -249,6 +255,7 @@
             </p>
           {/if}
         </div>
+        {/if}
         {#if feature.visible && feature.descChars.some(c => !c.done)}
           <div style="position:absolute;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--color-accent),transparent);opacity:0.3;animation:scanMove 2.5s ease-in-out infinite;"></div>
         {/if}

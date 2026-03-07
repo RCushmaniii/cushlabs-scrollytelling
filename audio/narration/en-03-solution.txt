@@ -1,13 +1,19 @@
-[confident] [deliberate] The solution [short pause] is scrollytelling. [pause]
+[confident] The solution is cinematic scrollytelling.
 
-We don't hand you a template. [short pause] CushLabs builds your cinematic presentation end to end — from narrative strategy [short pause] to immersive web experience. [pause]
+We don't hand you a template. CushLabs builds your cinematic presentation end to end — from narrative strategy to immersive web experience.
 
-[picking up energy] Every project includes Presentation Mode — one click, and your scroll locks, narration plays, sections auto-advance. [short pause] Your audience just [stress on next word] watches. [deliberate] No clicking. No fumbling. [pause]
+[picking up energy] Every project includes Presentation Mode. One click and your scroll locks, narration plays, sections auto-advance.
 
-Every presentation is bilingual by default — English and Spanish, instant toggle, [deliberate] zero friction. [pause]
+Your audience just [stress on next word] watches.
 
-We include professional AI narration and sound design [short pause] for every section, in both languages. [short pause] Ambient soundscapes that crossfade between chapters. [pause]
+No clicking. No fumbling.
 
-[slows down] And every pixel is engineered for CINEMATIC atmosphere — [long pause] film grain. [short pause] Parallax depth. [short pause] Ambient particles. [short pause] Scroll-triggered choreography. [long pause]
+Every presentation is bilingual by default — English and Spanish, instant toggle, zero friction.
 
-[deliberate] [confident] This is what it looks like [short pause] when your presentation is built to close.
+We include professional AI narration and sound design for every section in both languages. Ambient soundscapes crossfade between chapters.
+
+[deliberate] And every pixel is engineered for cinematic atmosphere — film grain, parallax depth, ambient particles, scroll-triggered choreography.
+
+This isn't a slide deck.
+
+[confident] It's a cinematic presentation built to close.

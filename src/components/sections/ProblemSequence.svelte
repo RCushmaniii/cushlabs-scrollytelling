@@ -1,9 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { presentationState } from "@/lib/presentation";
   import AnimatedCounter from "@/components/ui/AnimatedCounter.svelte";
 
   let el: HTMLElement;
   let lang = $state("en");
+  let presenting = $state(false);
   let step = $state(0);
   let running = $state(false);
   let timeouts: ReturnType<typeof setTimeout>[] = [];
@@ -185,7 +187,8 @@
   onMount(() => {
     lang = document.body.dataset.activeLang || "en";
 
-    // Watch for language changes
+    const unsub = presentationState.subscribe((s) => { presenting = s === "presenting"; });
+
     const mutObs = new MutationObserver(() => {
       const newLang = document.body.dataset.activeLang || "en";
       if (newLang !== lang) {
@@ -195,7 +198,6 @@
     });
     mutObs.observe(document.body, { attributes: true, attributeFilter: ["data-active-lang"] });
 
-    // Intersection observer — start on enter, reset on leave (repeatable)
     const intObs = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -210,6 +212,7 @@
 
     return () => {
       reset();
+      unsub();
       mutObs.disconnect();
       intObs.disconnect();
     };
@@ -226,7 +229,8 @@
     </h2>
   </div>
 
-  <!-- Subtext -->
+  <!-- Subtext (hidden in presentation mode — audience listens to narration instead) -->
+  {#if !presenting}
   <div class="max-w-3xl min-h-[3em]">
     {#if step >= 2}
       <p class="text-xl md:text-2xl text-[var(--color-text-muted)] leading-relaxed">
@@ -243,6 +247,7 @@
       </p>
     {/if}
   </div>
+  {/if}
 
   <!-- Stat Cards -->
   <div class="grid md:grid-cols-3 gap-6">

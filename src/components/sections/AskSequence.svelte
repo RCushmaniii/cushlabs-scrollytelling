@@ -2,13 +2,17 @@
   import { onMount } from "svelte";
   import * as THREE from "three";
   import { getEmail } from "@/lib/email";
+  import { presentationState } from "@/lib/presentation";
+  import { isPlaying } from "@/lib/audio";
 
   let el: HTMLDivElement;
   let bgCanvas: HTMLCanvasElement;
   let cardEl: HTMLDivElement;
   let headlineEl: HTMLHeadingElement;
   let lang = $state("en");
+  let presenting = $state(false);
   let cardVisible = $state(false);
+  let closingVisible = $state(false);
   let running = $state(false);
   let emailAddr = $state("");
   let renderer: THREE.WebGLRenderer | null = null;
@@ -16,16 +20,19 @@
 
   const content: Record<string, {
     subtitle: string;
+    closing: string;
     cta1: string;
     cta2: string;
   }> = {
     en: {
       subtitle: "Every project starts with a free consultation. We'll learn about your story, your audience, and your goals — then show you exactly how scrollytelling can deliver the impact you need.",
+      closing: "And we'd love to hear your story.",
       cta1: "Book a Free Consultation",
       cta2: "Send a Message",
     },
     es: {
       subtitle: "Cada proyecto comienza con una consulta gratuita. Conoceremos tu historia, tu audiencia y tus objetivos — y luego te mostraremos exactamente como el scrollytelling puede entregar el impacto que necesitas.",
+      closing: "Y nos encantaria escuchar tu historia.",
       cta1: "Reserva una Consulta Gratuita",
       cta2: "Enviar un Mensaje",
     },
@@ -239,6 +246,7 @@
   function reset() {
     running = false;
     cardVisible = false;
+    closingVisible = false;
     if (animFrameId) { cancelAnimationFrame(animFrameId); animFrameId = null; }
     if (headlineEl) headlineEl.innerHTML = "";
     showFireflies();
@@ -250,7 +258,13 @@
     hideFireflies();
     initStarField();
     buildHeadline();
-    requestAnimationFrame(() => { cardVisible = true; });
+    requestAnimationFrame(() => {
+      cardVisible = true;
+      // In presentation mode, fade in closing line after card animations settle
+      if (presenting) {
+        setTimeout(() => { closingVisible = true; }, 4000);
+      }
+    });
   }
 
   function handleEmailClick() {
@@ -262,6 +276,16 @@
   onMount(() => {
     lang = document.body.dataset.activeLang || "en";
     emailAddr = getEmail();
+
+    const unsubPres = presentationState.subscribe((s) => { presenting = s === "presenting"; });
+
+    // Fade out closing line when narration ends in presentation mode
+    const unsubAudio = isPlaying.subscribe((playing) => {
+      if (!playing && presenting && closingVisible) {
+        // Narration ended — fade out closing after a moment
+        setTimeout(() => { closingVisible = false; }, 2000);
+      }
+    });
 
     const mutObs = new MutationObserver(() => {
       const newLang = document.body.dataset.activeLang || "en";
@@ -288,6 +312,8 @@
 
     return () => {
       reset();
+      unsubPres();
+      unsubAudio();
       mutObs.disconnect();
       intObs.disconnect();
       window.removeEventListener("resize", onResize);
@@ -517,4 +543,22 @@
       {/if}
     </div>
   </div>
+
+  <!-- Closing line: fades in during presentation, fades out when narration ends -->
+  {#if presenting}
+    <p style="
+      position:absolute;
+      bottom:8%;
+      left:0;right:0;
+      text-align:center;
+      font-family:var(--font-heading, 'Playfair Display', serif);
+      font-size:clamp(20px, 3vw, 32px);
+      font-style:italic;
+      color:#EDE3C8;
+      z-index:2;
+      opacity:{closingVisible ? 0.85 : 0};
+      transform:translateY({closingVisible ? '0' : '12px'});
+      transition:opacity 1.5s ease, transform 1.5s ease;
+    ">{content[lang].closing}</p>
+  {/if}
 </div>

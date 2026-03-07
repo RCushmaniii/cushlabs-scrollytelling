@@ -1,9 +1,17 @@
-[warmly] Don't take our word for it. [pause]
+[warmly] But don't take our word for it.
 
-Our first scrollytelling project was a biodiversity conservation pitch [short pause] for western Mexico. Built as a proof of concept. [pause]
+Our first scrollytelling project was a biodiversity conservation pitch for western Mexico — a real proposal to secure conservation funding.
 
-The project director told us — and I'm quoting — [long pause]
+The project director told us — and I'm quoting:
 
-[deliberate] [slightly lowered voice] "They couldn't believe it was a website. [short pause] They thought it was a professionally produced FILM. [pause] That's the reaction you want [slows down] when you're asking for seven figures." [long pause]
+[deliberate] [slightly lowered voice] "They couldn't believe it was a website.
 
-[normal voice] [confident] You can see the full demo live [stress on next word] right now. Click through it. [short pause] [deliberate] That's the standard we build to.
+They thought it was a professionally produced experience."
+
+That's the reaction you want when you're asking for serious funding."
+
+[confident] The full demo is live right now.
+
+What you're watching was built the same way.
+
+[deliberate] That's the difference.

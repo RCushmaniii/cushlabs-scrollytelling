@@ -1,5 +1,6 @@
 import { writable, get } from "svelte/store";
 import { playSection, stopAll, isPlaying } from "./audio";
+import { currentLang } from "./i18n";
 
 export type PresentationState = "overlay" | "presenting" | "browsing";
 
@@ -15,6 +16,10 @@ const SECTION_DWELL_MS: Record<string, number> = {
   solution: 20000,  // Headline animation + feature cards reveal
   proof: 16000,     // Evidence / stats
   ask: 18000,       // CTA with letter-slam + card animations
+};
+/** Bridge audio clips between sections: key is "fromId-toId" */
+const BRIDGE_AUDIO: Record<string, string> = {
+  "problem-solution": "02-03-bridge",
 };
 /** Pause between narration ending and scrolling to next section */
 const POST_NARRATION_PAUSE_MS = 1500;
@@ -98,6 +103,25 @@ function scrollToSection(el: HTMLElement): Promise<void> {
 }
 
 /**
+ * Play a bridge audio clip between sections. Resolves when finished.
+ */
+async function playBridge(fromId: string, toId: string): Promise<void> {
+  const key = `${fromId}-${toId}`;
+  const file = BRIDGE_AUDIO[key];
+  if (!file) return;
+
+  const lang = get(currentLang);
+  const path = `/audio/${lang}/${file}.mp3`;
+  const audio = new Audio(path);
+
+  return new Promise((resolve) => {
+    audio.addEventListener("ended", () => resolve(), { once: true });
+    audio.addEventListener("error", () => resolve(), { once: true });
+    audio.play().catch(() => resolve());
+  });
+}
+
+/**
  * Try to play narration for a section. Returns true if audio started playing.
  */
 async function tryPlayNarration(sectionId: string): Promise<boolean> {
@@ -157,6 +181,10 @@ async function runPresentation() {
 
     // Scroll to section (first section is already visible)
     if (i > 0) {
+      // Play bridge audio between sections if one exists
+      await playBridge(sections[i - 1].id, sections[i].id);
+      if (get(presentationState) !== "presenting") return;
+
       await scrollToSection(sections[i]);
       // Allow scroll animations to settle
       await sleep(POST_SCROLL_SETTLE_MS);
