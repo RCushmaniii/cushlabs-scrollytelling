@@ -436,12 +436,6 @@
         "></div>
       {/if}
 
-      <!-- Corner accents -->
-      <div style="position:absolute;top:12px;left:12px;width:18px;height:18px;border-color:rgba(240,192,64,0.55);border-style:solid;border-width:1px 0 0 1px;border-radius:2px 0 0 0;pointer-events:none;"></div>
-      <div style="position:absolute;top:12px;right:12px;width:18px;height:18px;border-color:rgba(240,192,64,0.55);border-style:solid;border-width:1px 1px 0 0;border-radius:0 2px 0 0;pointer-events:none;"></div>
-      <div style="position:absolute;bottom:12px;left:12px;width:18px;height:18px;border-color:rgba(240,192,64,0.55);border-style:solid;border-width:0 0 1px 1px;border-radius:0 0 0 2px;pointer-events:none;"></div>
-      <div style="position:absolute;bottom:12px;right:12px;width:18px;height:18px;border-color:rgba(240,192,64,0.55);border-style:solid;border-width:0 1px 1px 0;border-radius:0 0 2px 0;pointer-events:none;"></div>
-
       <!-- Eyebrow -->
       <p style="
         font-size:0.75rem;
