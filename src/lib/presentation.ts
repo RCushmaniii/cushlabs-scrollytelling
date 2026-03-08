@@ -246,6 +246,7 @@ export function exitPresentation() {
   clearAllTimers();
   presentationState.set("browsing");
   document.body.classList.remove("presentation-active");
+  document.documentElement.classList.remove("pres-no-scrollbar");
   unlockScroll();
   stopAll();
 }
@@ -254,6 +255,7 @@ export function viewSiteMode() {
   presentationState.set("browsing");
   document.body.classList.remove("overlay-active");
   document.body.classList.remove("presentation-active");
+  document.documentElement.classList.remove("pres-no-scrollbar");
 
   // Trigger hero animation
   const hero = document.querySelector(".hero-text-container");
@@ -266,6 +268,7 @@ export function resetToOverlay() {
   unlockScroll();
   document.body.classList.remove("presentation-active");
   document.body.classList.add("overlay-active");
+  document.documentElement.classList.add("pres-no-scrollbar");
   window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
   presentationState.set("overlay");
 
