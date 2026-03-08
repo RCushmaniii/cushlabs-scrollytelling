@@ -71,10 +71,19 @@
     pointer-events: none;
   }
 
-  /* Presentation mode: hide scroll indicator during auto-play */
+  /* Presentation mode: hide scroll indicator and scrollbar during auto-play */
   body.presentation-active .scroll-nav,
   body.presentation-active .scroll-label {
     display: none;
+  }
+
+  body.presentation-active,
+  body.presentation-active html {
+    scrollbar-width: none; /* Firefox */
+  }
+  body.presentation-active::-webkit-scrollbar,
+  html:has(body.presentation-active)::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
   }
 
   /* Focus indicators for accessibility */
