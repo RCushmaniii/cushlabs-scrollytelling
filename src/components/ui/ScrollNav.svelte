@@ -31,6 +31,9 @@
         return;
       }
     }
+
+    // No next section found — scroll to bottom (footer)
+    window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
   }
 </script>
 
