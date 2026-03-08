@@ -77,13 +77,14 @@
     display: none;
   }
 
-  body.presentation-active,
-  body.presentation-active html {
-    scrollbar-width: none; /* Firefox */
+  html.pres-no-scrollbar,
+  html.pres-no-scrollbar body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  body.presentation-active::-webkit-scrollbar,
-  html:has(body.presentation-active)::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Edge */
+  html.pres-no-scrollbar::-webkit-scrollbar,
+  html.pres-no-scrollbar body::-webkit-scrollbar {
+    display: none;
   }
 
   /* Focus indicators for accessibility */

@@ -53,8 +53,7 @@ function lockScroll() {
   window.addEventListener("wheel", scrollLockHandlers.wheel, { passive: false });
   window.addEventListener("touchmove", scrollLockHandlers.touchmove, { passive: false });
   window.addEventListener("keydown", scrollLockHandlers.keydown, { passive: false });
-  document.documentElement.style.overflow = "hidden";
-  document.body.style.overflow = "hidden";
+  document.documentElement.classList.add("pres-no-scrollbar");
 }
 
 function unlockScroll() {
@@ -63,8 +62,7 @@ function unlockScroll() {
   window.removeEventListener("touchmove", scrollLockHandlers.touchmove);
   window.removeEventListener("keydown", scrollLockHandlers.keydown);
   scrollLockHandlers = null;
-  document.documentElement.style.overflow = "";
-  document.body.style.overflow = "";
+  document.documentElement.classList.remove("pres-no-scrollbar");
 }
 
 function getSections(): HTMLElement[] {
