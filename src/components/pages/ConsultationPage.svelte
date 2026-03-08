@@ -5,34 +5,28 @@
   let lang = $state("en");
   let emailAddr = $state("");
 
-  // Form state
+  const API_BASE = "https://cushlabs-booking.rcushmaniii.workers.dev";
+
+  // Step state
+  let currentStep = $state(1);
+
+  // Step 1: Date & Time
+  let calendarMonth = $state(new Date());
+  let selectedDate = $state<Date | null>(null);
+  let selectedTime = $state<string | null>(null);
+  let timeSlots = $state<string[]>([]);
+  let loadingSlots = $state(false);
+
+  // Step 2: Your Details
   let name = $state("");
   let email = $state("");
-  let preferredDate = $state("");
-  let preferredTime = $state("");
-  let message = $state("");
+  let phone = $state("");
+  let notes = $state("");
   let submitting = $state(false);
-  let submitted = $state(false);
   let error = $state("");
 
-  // Compute min date (tomorrow) for date picker
-  let minDate = $state("");
-
-  onMount(() => {
-    lang = document.body.dataset.activeLang || "en";
-    emailAddr = getEmail();
-
-    // Set min date to tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    minDate = tomorrow.toISOString().split("T")[0];
-
-    const obs = new MutationObserver(() => {
-      lang = document.body.dataset.activeLang || "en";
-    });
-    obs.observe(document.body, { attributes: true, attributeFilter: ["data-active-lang"] });
-    return () => obs.disconnect();
-  });
+  // Step 3: Success
+  let submitted = $state(false);
 
   const t: Record<string, Record<string, string>> = {
     en: {
@@ -50,27 +44,43 @@
       what2: "Share relevant examples and what makes scrollytelling effective",
       what3: "Discuss scope, timeline, and a clear path forward",
       what4: "No pressure, no pitch — just an honest conversation",
-      nameLabel: "Name",
+      step1: "Date & Time",
+      step2: "Your Details",
+      step3: "Confirmed",
+      selectDate: "Select a date and time",
+      selectedDateLabel: "Selected Date",
+      selectDateBelow: "Choose a date below",
+      selectTime: "Available Times",
+      loading: "Loading...",
+      noSlots: "No available times for this date.",
+      nameLabel: "Full Name",
       emailLabel: "Email",
-      dateLabel: "Preferred Date",
-      timeLabel: "Preferred Time",
-      timePlaceholder: "Select a time...",
-      timeMorning: "Morning (9:00 – 12:00)",
-      timeAfternoon: "Afternoon (12:00 – 17:00)",
-      timeEvening: "Evening (17:00 – 20:00)",
-      timeFlexible: "Flexible — any time works",
-      messageLabel: "Anything else?",
-      messagePlaceholder: "Optional — tell us anything that would help us prepare for the call.",
-      submit: "Book Consultation",
-      sending: "Booking...",
+      phoneLabel: "Phone Number",
+      phoneHint: "Optional — for WhatsApp confirmation",
+      notesLabel: "Anything you'd like us to know?",
+      notesPlaceholder: "Optional — anything that helps us prepare.",
+      back: "Back",
+      next: "Next",
+      confirm: "Confirm Appointment",
+      confirming: "Processing...",
       required: "*",
-      timezone: "Times are in your local timezone",
-      errorRequired: "Please enter your name, email, and pick a date.",
+      errorRequired: "Please fill in the required fields.",
+      errorDateTime: "Please select a date and time first.",
       errorGeneric: "Something went wrong. Try again or reach out via WhatsApp.",
       successTitle: "You're Booked",
-      successDesc: "We'll confirm your time slot and send a calendar invite within 24 hours.",
-      successCta: "Back to Home",
+      successDesc: "We'll send a calendar invite to your email with a Zoom/Meet link.",
+      summaryDateTime: "Date & Time",
+      summaryDetails: "Contact",
+      summaryTimezone: "Times shown in your local timezone",
+      summaryMeeting: "Meeting Type",
+      summaryMeetingValue: "Video Call (Zoom/Google Meet)",
+      summaryMeetingHint: "Link will be in your calendar invite",
+      prepareTitle: "How to Prepare",
+      prepareBody: "No prep needed. Just come ready to tell us about your story, your audience, and what you want to achieve. We'll handle the rest.",
+      signOff: "Looking forward to it,",
+      returnHome: "Return to Home",
       orReach: "Or reach us directly",
+      notProvided: "Not provided",
     },
     es: {
       badge: "Consulta Gratuita",
@@ -87,27 +97,43 @@
       what2: "Compartiremos ejemplos relevantes y que hace efectivo al scrollytelling",
       what3: "Discutiremos alcance, cronograma y un camino claro",
       what4: "Sin presion, sin ventas — solo una conversacion honesta",
-      nameLabel: "Nombre",
+      step1: "Fecha y Hora",
+      step2: "Tus Datos",
+      step3: "Confirmado",
+      selectDate: "Selecciona fecha y hora",
+      selectedDateLabel: "Fecha Seleccionada",
+      selectDateBelow: "Elige una fecha abajo",
+      selectTime: "Horarios Disponibles",
+      loading: "Cargando...",
+      noSlots: "No hay horarios disponibles para esta fecha.",
+      nameLabel: "Nombre Completo",
       emailLabel: "Correo",
-      dateLabel: "Fecha Preferida",
-      timeLabel: "Horario Preferido",
-      timePlaceholder: "Selecciona un horario...",
-      timeMorning: "Manana (9:00 – 12:00)",
-      timeAfternoon: "Tarde (12:00 – 17:00)",
-      timeEvening: "Noche (17:00 – 20:00)",
-      timeFlexible: "Flexible — cualquier horario",
-      messageLabel: "Algo mas?",
-      messagePlaceholder: "Opcional — cuentanos lo que nos ayude a prepararnos para la llamada.",
-      submit: "Reservar Consulta",
-      sending: "Reservando...",
+      phoneLabel: "Telefono",
+      phoneHint: "Opcional — para confirmacion por WhatsApp",
+      notesLabel: "Algo que quieras que sepamos?",
+      notesPlaceholder: "Opcional — lo que nos ayude a prepararnos.",
+      back: "Atras",
+      next: "Siguiente",
+      confirm: "Confirmar Cita",
+      confirming: "Procesando...",
       required: "*",
-      timezone: "Los horarios son en tu zona horaria local",
-      errorRequired: "Ingresa tu nombre, correo y selecciona una fecha.",
+      errorRequired: "Completa los campos requeridos.",
+      errorDateTime: "Selecciona una fecha y hora primero.",
       errorGeneric: "Hubo un error. Intenta de nuevo o escribenos por WhatsApp.",
       successTitle: "Reservado",
-      successDesc: "Confirmaremos tu horario y enviaremos una invitacion de calendario en 24 horas.",
-      successCta: "Volver al Inicio",
+      successDesc: "Te enviaremos una invitacion de calendario con el enlace de Zoom/Meet.",
+      summaryDateTime: "Fecha y Hora",
+      summaryDetails: "Contacto",
+      summaryTimezone: "Horarios en tu zona horaria local",
+      summaryMeeting: "Tipo de Reunion",
+      summaryMeetingValue: "Videollamada (Zoom/Google Meet)",
+      summaryMeetingHint: "El enlace estara en tu invitacion de calendario",
+      prepareTitle: "Como Prepararte",
+      prepareBody: "No necesitas preparar nada. Solo ven listo para contarnos tu historia, tu audiencia y lo que quieres lograr. Nosotros nos encargamos del resto.",
+      signOff: "Con gusto,",
+      returnHome: "Volver al Inicio",
       orReach: "O contactanos directamente",
+      notProvided: "No proporcionado",
     },
   };
 
@@ -115,54 +141,132 @@
     return t[lang]?.[key] ?? t.en[key] ?? key;
   }
 
-  function formatDateForDisplay(dateStr: string): string {
-    if (!dateStr) return "";
-    const d = new Date(dateStr + "T12:00:00");
-    return d.toLocaleDateString(lang === "es" ? "es-MX" : "en-US", {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
+  // Calendar helpers
+  const monthNames: Record<string, string[]> = {
+    en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    es: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+  };
+  const dayNames: Record<string, string[]> = {
+    en: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"],
+    es: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+  };
+
+  function getMonthLabel(): string {
+    const names = monthNames[lang] || monthNames.en;
+    return `${names[calendarMonth.getMonth()]} ${calendarMonth.getFullYear()}`;
+  }
+
+  function getCalendarDays(): ({ day: number; date: Date; isPast: boolean; isToday: boolean; isSelected: boolean } | null)[] {
+    const year = calendarMonth.getFullYear();
+    const month = calendarMonth.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const cells: ({ day: number; date: Date; isPast: boolean; isToday: boolean; isSelected: boolean } | null)[] = [];
+
+    for (let i = 0; i < firstDay; i++) cells.push(null);
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      date.setHours(0, 0, 0, 0);
+      cells.push({
+        day,
+        date,
+        isPast: date < today,
+        isToday: date.getTime() === today.getTime(),
+        isSelected: selectedDate ? date.getTime() === selectedDate.getTime() : false,
+      });
+    }
+    return cells;
+  }
+
+  function prevMonth() {
+    const d = new Date(calendarMonth);
+    d.setMonth(d.getMonth() - 1);
+    calendarMonth = d;
+  }
+
+  function nextMonth() {
+    const d = new Date(calendarMonth);
+    d.setMonth(d.getMonth() + 1);
+    calendarMonth = d;
+  }
+
+  async function selectDate(date: Date) {
+    selectedDate = date;
+    selectedTime = null;
+    timeSlots = [];
+    loadingSlots = true;
+
+    try {
+      const dateStr = date.toISOString().split("T")[0];
+      const res = await fetch(`${API_BASE}/slots/${dateStr}?lang=${lang}`);
+      const data = await res.json();
+      if (data.ok && data.slots?.length) {
+        timeSlots = data.slots;
+      } else {
+        timeSlots = [];
+      }
+    } catch {
+      timeSlots = [];
+    } finally {
+      loadingSlots = false;
+    }
+  }
+
+  function selectTime(time: string) {
+    selectedTime = time;
+    // Auto-advance to step 2
+    setTimeout(() => { currentStep = 2; }, 300);
+  }
+
+  function formatSelectedDate(): string {
+    if (!selectedDate) return i("selectDateBelow");
+    return selectedDate.toLocaleDateString(lang === "es" ? "es-MX" : "en-US", {
+      weekday: "long", year: "numeric", month: "long", day: "numeric",
     });
   }
 
-  async function handleSubmit(e: Event) {
-    e.preventDefault();
+  async function handleConfirm() {
     error = "";
 
-    if (!name.trim() || !email.trim() || !preferredDate) {
+    if (!selectedDate || !selectedTime) {
+      error = i("errorDateTime");
+      currentStep = 1;
+      return;
+    }
+
+    if (!name.trim() || !email.trim()) {
       error = i("errorRequired");
       return;
     }
 
     submitting = true;
 
-    // Detect user timezone
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
     try {
-      const res = await fetch("https://formspree.io/f/mlgwnqky", {
+      const dateStr = selectedDate.toISOString().split("T")[0];
+      const res = await fetch(`${API_BASE}/book`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
           email: email.trim(),
-          _replyto: email.trim(),
-          preferredDate,
-          preferredTime: preferredTime || "flexible",
-          timezone: tz,
-          message: message.trim() || undefined,
-          _subject: `Consultation booking: ${name.trim()} — ${formatDateForDisplay(preferredDate)}`,
-          _type: "consultation",
-          _language: lang,
+          date: dateStr,
+          time: selectedTime,
+          lang,
+          notes: notes.trim() || "",
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.errors ? data.errors.map((e: any) => e.message).join(", ") : "Unknown error");
+      if (data.ok) {
+        submitted = true;
+        currentStep = 3;
+      } else {
+        throw new Error(data.error || "Booking failed");
       }
-
-      submitted = true;
     } catch {
       error = i("errorGeneric");
     } finally {
@@ -176,6 +280,30 @@
       : "Hi Robert! I'd like to book a scrollytelling consultation.";
     return `https://api.whatsapp.com/send/?phone=523315590572&text=${encodeURIComponent(msg)}&type=phone_number&app_absent=0`;
   }
+
+  onMount(() => {
+    lang = document.body.dataset.activeLang || "en";
+    emailAddr = getEmail();
+
+    // Auto-select today or tomorrow
+    const now = new Date();
+    if (now.getHours() >= 18) {
+      const tomorrow = new Date(now);
+      tomorrow.setDate(now.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      selectDate(tomorrow);
+    } else {
+      const today = new Date(now);
+      today.setHours(0, 0, 0, 0);
+      selectDate(today);
+    }
+
+    const obs = new MutationObserver(() => {
+      lang = document.body.dataset.activeLang || "en";
+    });
+    obs.observe(document.body, { attributes: true, attributeFilter: ["data-active-lang"] });
+    return () => obs.disconnect();
+  });
 </script>
 
 <!-- Hero -->
@@ -209,134 +337,268 @@
 
 <!-- Booking section -->
 <section class="max-w-[900px] mx-auto px-6 pb-16">
-  <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
-    <!-- Left column: What to expect -->
-    <div class="lg:col-span-2">
-      <div class="glass-panel p-8 lg:sticky lg:top-28">
-        <h3 class="font-heading text-lg font-bold text-[var(--color-text)] mb-5">{i("whatTitle")}</h3>
-        <div class="space-y-3">
-          {#each [i("what1"), i("what2"), i("what3"), i("what4")] as item}
-            <div class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              <p class="text-sm text-[var(--color-text-muted)] leading-relaxed">{item}</p>
-            </div>
-          {/each}
+  <!-- What to expect -->
+  <div class="glass-panel p-8 mb-8">
+    <h3 class="font-heading text-lg font-bold text-[var(--color-text)] mb-5">{i("whatTitle")}</h3>
+    <div class="space-y-3">
+      {#each [i("what1"), i("what2"), i("what3"), i("what4")] as item}
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          <p class="text-base text-[var(--color-text-muted)] leading-relaxed">{item}</p>
+        </div>
+      {/each}
+    </div>
+  </div>
+
+  <!-- Step progress -->
+  <div class="flex items-center justify-center gap-2 mb-8">
+    {#each [1, 2, 3] as s}
+      <div class="flex items-center gap-2" class:opacity-40={s > currentStep}>
+        <div
+          class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-mono font-bold transition-colors {s <= currentStep ? 'step-active' : 'step-inactive'}"
+        >
+          {#if s < currentStep}
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          {:else}
+            {s}
+          {/if}
+        </div>
+        <span class="text-sm font-mono text-[var(--color-text-muted)] hidden sm:inline">
+          {i(`step${s}`)}
+        </span>
+        {#if s < 3}
+          <div class="w-8 h-px bg-white/10 mx-1"></div>
+        {/if}
+      </div>
+    {/each}
+  </div>
+
+  <!-- Step 1: Date & Time -->
+  {#if currentStep === 1}
+    <div class="glass-panel p-8 md:p-10 animate-fade-up">
+      <h2 class="font-heading text-2xl font-bold text-[var(--color-text)] mb-2">{i("selectDate")}</h2>
+
+      <!-- Selected date display -->
+      <div class="rounded-xl border-2 border-[var(--color-accent)]/30 bg-[var(--color-accent)]/5 p-4 mb-6">
+        <p class="text-xs font-mono uppercase tracking-wider text-[var(--color-text-muted)] mb-1">{i("selectedDateLabel")}</p>
+        <p class="text-xl font-heading font-bold text-[var(--color-text)]">{formatSelectedDate()}</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Calendar -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <button type="button" onclick={prevMonth} class="p-2 rounded-xl border border-white/10 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors text-[var(--color-text)]">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <h3 class="text-lg font-heading font-bold text-[var(--color-text)]">{getMonthLabel()}</h3>
+            <button type="button" onclick={nextMonth} class="p-2 rounded-xl border border-white/10 hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition-colors text-[var(--color-text)]">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
+          </div>
+
+          <!-- Day headers -->
+          <div class="grid grid-cols-7 gap-1 mb-2">
+            {#each (dayNames[lang] || dayNames.en) as day}
+              <div class="text-center text-xs font-mono font-semibold uppercase tracking-wider text-[var(--color-text-muted)] py-2">{day}</div>
+            {/each}
+          </div>
+
+          <!-- Calendar days -->
+          <div class="grid grid-cols-7 gap-1">
+            {#each getCalendarDays() as cell}
+              {#if cell === null}
+                <div class="p-2"></div>
+              {:else if cell.isPast}
+                <button type="button" disabled class="cal-day cal-past">{cell.day}</button>
+              {:else if cell.isSelected}
+                <button type="button" class="cal-day cal-selected" onclick={() => selectDate(cell.date)}>{cell.day}</button>
+              {:else}
+                <button type="button" class="cal-day cal-available" class:cal-today={cell.isToday} onclick={() => selectDate(cell.date)}>{cell.day}</button>
+              {/if}
+            {/each}
+          </div>
         </div>
 
-        <!-- Direct contact -->
-        <div class="mt-8 pt-6 border-t border-white/5">
-          <p class="text-xs text-[var(--color-text-muted)] mb-3">{i("orReach")}</p>
-          <div class="space-y-2">
-            {#if emailAddr}
-              <a href="mailto:{emailAddr}" class="flex items-center gap-2 text-sm text-[var(--color-accent)] hover:opacity-80 transition-opacity">
-                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                </svg>
-                {emailAddr}
-              </a>
-            {/if}
-            <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm text-[#25D366] hover:opacity-80 transition-opacity">
-              <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-              </svg>
-              WhatsApp
-            </a>
-          </div>
+        <!-- Time slots -->
+        <div>
+          <h3 class="text-lg font-heading font-semibold text-[var(--color-text)] mb-4">{i("selectTime")}</h3>
+          {#if loadingSlots}
+            <p class="text-[var(--color-text-muted)] text-center py-8">{i("loading")}</p>
+          {:else if timeSlots.length === 0}
+            <p class="text-[var(--color-text-muted)] text-center py-8">{i("noSlots")}</p>
+          {:else}
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {#each timeSlots as time}
+                <button
+                  type="button"
+                  class="time-slot {selectedTime === time ? 'time-selected' : ''}"
+                  onclick={() => selectTime(time)}
+                >
+                  {time}
+                </button>
+              {/each}
+            </div>
+          {/if}
         </div>
       </div>
     </div>
+  {/if}
 
-    <!-- Right column: Form -->
-    <div class="lg:col-span-3">
-      {#if submitted}
-        <!-- Success state -->
-        <div class="glass-panel p-10 text-center">
-          <div class="w-16 h-16 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto mb-5">
-            <svg class="w-8 h-8 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h3 class="font-heading text-2xl font-bold text-[var(--color-text)] mb-3">{i("successTitle")}</h3>
-          <p class="text-[var(--color-text-muted)] max-w-md mx-auto mb-8">{i("successDesc")}</p>
-          <a href="/" class="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-accent)] text-[var(--color-background)] font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5">
-            {i("successCta")}
-          </a>
-        </div>
-      {:else}
-        <div class="glass-panel p-8 md:p-10">
-          <form onsubmit={handleSubmit}>
-            <div class="space-y-5">
-              <!-- Name -->
-              <div>
-                <label for="c-name" class="form-label">
-                  {i("nameLabel")} <span class="text-[var(--color-accent)]">{i("required")}</span>
-                </label>
-                <input type="text" id="c-name" bind:value={name} required autocomplete="name" class="form-input" />
-              </div>
+  <!-- Step 2: Your Details -->
+  {#if currentStep === 2}
+    <div class="glass-panel p-8 md:p-10 animate-fade-up">
+      <h2 class="font-heading text-2xl font-bold text-[var(--color-text)] mb-6">{i("step2")}</h2>
 
-              <!-- Email -->
-              <div>
-                <label for="c-email" class="form-label">
-                  {i("emailLabel")} <span class="text-[var(--color-accent)]">{i("required")}</span>
-                </label>
-                <input type="email" id="c-email" bind:value={email} required autocomplete="email" class="form-input" />
-              </div>
-
-              <!-- Date & Time row -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label for="c-date" class="form-label">
-                    {i("dateLabel")} <span class="text-[var(--color-accent)]">{i("required")}</span>
-                  </label>
-                  <input type="date" id="c-date" bind:value={preferredDate} min={minDate} required class="form-input" />
-                </div>
-                <div>
-                  <label for="c-time" class="form-label">{i("timeLabel")}</label>
-                  <select id="c-time" bind:value={preferredTime} class="form-input">
-                    <option value="">{i("timePlaceholder")}</option>
-                    <option value="morning">{i("timeMorning")}</option>
-                    <option value="afternoon">{i("timeAfternoon")}</option>
-                    <option value="evening">{i("timeEvening")}</option>
-                    <option value="flexible">{i("timeFlexible")}</option>
-                  </select>
-                </div>
-              </div>
-              <p class="text-xs text-[var(--color-text-muted)] opacity-50 -mt-2">{i("timezone")}</p>
-
-              <!-- Optional message -->
-              <div>
-                <label for="c-message" class="form-label">{i("messageLabel")}</label>
-                <textarea id="c-message" bind:value={message} rows="3" placeholder={i("messagePlaceholder")} class="form-input resize-y min-h-[80px]"></textarea>
-              </div>
-            </div>
-
-            {#if error}
-              <div class="mt-4 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-sm text-red-400">
-                {error}
-              </div>
-            {/if}
-
-            <!-- Submit -->
-            <div class="mt-8">
-              <button type="submit" disabled={submitting} class="w-full inline-flex items-center justify-center gap-2 px-8 py-4 bg-[var(--color-accent)] text-[var(--color-background)] font-semibold text-lg rounded-xl transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_0_30px_var(--color-accent)]/20 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0">
-                {#if submitting}
-                  <span class="w-5 h-5 border-2 border-[var(--color-background)]/30 border-t-[var(--color-background)] rounded-full animate-spin"></span>
-                  {i("sending")}
-                {:else}
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  {i("submit")}
-                {/if}
-              </button>
-            </div>
-          </form>
+      {#if error}
+        <div class="mb-6 bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-sm text-red-400">
+          {error}
         </div>
       {/if}
+
+      <div class="space-y-5 max-w-md mx-auto">
+        <div>
+          <label for="c-name" class="form-label">
+            {i("nameLabel")} <span class="text-[var(--color-accent)]">*</span>
+          </label>
+          <input type="text" id="c-name" bind:value={name} required autocomplete="name" class="form-input" />
+        </div>
+        <div>
+          <label for="c-email" class="form-label">
+            {i("emailLabel")} <span class="text-[var(--color-accent)]">*</span>
+          </label>
+          <input type="email" id="c-email" bind:value={email} required autocomplete="email" class="form-input" />
+        </div>
+        <div>
+          <label for="c-phone" class="form-label">{i("phoneLabel")}</label>
+          <input type="tel" id="c-phone" bind:value={phone} autocomplete="tel" class="form-input" />
+          <p class="text-xs text-[var(--color-text-muted)] mt-1.5 opacity-60">{i("phoneHint")}</p>
+        </div>
+        <div>
+          <label for="c-notes" class="form-label">{i("notesLabel")}</label>
+          <textarea id="c-notes" bind:value={notes} rows="3" placeholder={i("notesPlaceholder")} class="form-input resize-y min-h-[80px]"></textarea>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mt-8 max-w-md mx-auto">
+        <button type="button" onclick={() => { error = ""; currentStep = 1; }} class="text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+          {i("back")}
+        </button>
+        <button
+          type="button"
+          onclick={handleConfirm}
+          disabled={submitting}
+          class="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-accent)] text-[var(--color-background)] font-semibold rounded-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:translate-y-0"
+        >
+          {#if submitting}
+            <span class="w-4 h-4 border-2 border-[var(--color-background)]/30 border-t-[var(--color-background)] rounded-full animate-spin"></span>
+            {i("confirming")}
+          {:else}
+            {i("confirm")}
+          {/if}
+        </button>
+      </div>
     </div>
-  </div>
+  {/if}
+
+  <!-- Step 3: Success -->
+  {#if currentStep === 3}
+    <div class="glass-panel p-10 animate-fade-up">
+      <div class="text-center mb-6">
+        <div class="w-20 h-20 rounded-full bg-emerald-500/15 flex items-center justify-center mx-auto mb-4">
+          <svg class="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 class="font-heading text-3xl font-bold text-[var(--color-text)] mb-3">{i("successTitle")}</h2>
+        <p class="text-lg text-[var(--color-text-muted)] max-w-lg mx-auto">{i("successDesc")}</p>
+      </div>
+
+      <div class="max-w-lg mx-auto space-y-6">
+        <!-- Summary card -->
+        <div class="rounded-xl p-6 space-y-4 border border-[var(--color-accent)]/20 bg-[var(--color-accent)]/5">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <div>
+              <p class="text-xs font-mono uppercase tracking-wider text-[var(--color-text-muted)]">{i("summaryDateTime")}</p>
+              <p class="text-lg font-heading font-bold text-[var(--color-text)]">{formatSelectedDate()} — {selectedTime}</p>
+              <p class="text-xs text-[var(--color-text-muted)] mt-1">{i("summaryTimezone")}</p>
+            </div>
+          </div>
+
+          <div class="border-t border-[var(--color-accent)]/20"></div>
+
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <div>
+              <p class="text-xs font-mono uppercase tracking-wider text-[var(--color-text-muted)]">{i("summaryDetails")}</p>
+              <p class="font-heading font-bold text-[var(--color-text)]">{name}</p>
+              <p class="text-[var(--color-text-muted)]">{email}</p>
+              {#if phone}
+                <p class="text-[var(--color-text-muted)]">{phone}</p>
+              {/if}
+            </div>
+          </div>
+
+          <div class="border-t border-[var(--color-accent)]/20"></div>
+
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-[var(--color-accent)] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            <div>
+              <p class="text-xs font-mono uppercase tracking-wider text-[var(--color-text-muted)]">{i("summaryMeeting")}</p>
+              <p class="font-heading font-bold text-[var(--color-text)]">{i("summaryMeetingValue")}</p>
+              <p class="text-xs text-[var(--color-text-muted)] mt-1">{i("summaryMeetingHint")}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- How to prepare -->
+        <div class="rounded-xl border-2 border-white/5 p-6">
+          <h3 class="font-heading text-lg font-bold text-[var(--color-text)] mb-3">{i("prepareTitle")}</h3>
+          <p class="text-[var(--color-text-muted)] leading-relaxed">{i("prepareBody")}</p>
+        </div>
+
+        <div class="text-center">
+          <p class="text-lg text-[var(--color-text-muted)] mb-6">
+            {i("signOff")}<br />
+            <span class="font-heading font-bold text-[var(--color-text)]">Robert</span>
+          </p>
+          <a href="/" class="text-[var(--color-text-muted)] hover:text-[var(--color-accent)] font-semibold text-sm underline-offset-4 hover:underline transition-colors">
+            {i("returnHome")}
+          </a>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  <!-- Direct contact fallback -->
+  {#if currentStep !== 3}
+    <div class="text-center mt-8">
+      <p class="text-sm text-[var(--color-text-muted)] mb-2">{i("orReach")}</p>
+      <div class="flex items-center justify-center gap-4">
+        {#if emailAddr}
+          <a href="mailto:{emailAddr}" class="text-sm text-[var(--color-accent)] hover:opacity-80 transition-opacity">
+            {emailAddr}
+          </a>
+        {/if}
+        <span class="text-[var(--color-text-muted)] opacity-30">|</span>
+        <a href={getWhatsAppUrl()} target="_blank" rel="noopener noreferrer" class="text-sm text-[#25D366] hover:opacity-80 transition-opacity">
+          WhatsApp
+        </a>
+      </div>
+    </div>
+  {/if}
 </section>
 
 <style>
@@ -404,25 +666,65 @@
     opacity: 0.5;
   }
 
-  /* Date input styling */
-  input[type="date"].form-input {
-    color-scheme: dark;
+  .step-active {
+    background: var(--color-accent);
+    color: var(--color-background);
   }
-  input[type="date"].form-input::-webkit-calendar-picker-indicator {
-    filter: invert(0.7);
+  .step-inactive {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text-muted);
+  }
+
+  /* Calendar */
+  .cal-day {
+    padding: 0.5rem;
+    text-align: center;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    font-family: var(--font-mono);
+  }
+  .cal-past {
+    color: var(--color-text-muted);
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .cal-available {
+    color: var(--color-text);
+    cursor: pointer;
+  }
+  .cal-available:hover {
+    border: 1px solid var(--color-accent);
+  }
+  .cal-today {
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--color-accent) 50%, transparent);
+  }
+  .cal-selected {
+    background: var(--color-accent);
+    color: var(--color-background);
     cursor: pointer;
   }
 
-  select.form-input {
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23A0998C' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    padding-right: 2.5rem;
-  }
-  select.form-input option {
-    background: #1a1a1a;
+  /* Time slots */
+  .time-slot {
+    padding: 0.75rem 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 600;
     color: var(--color-text);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .time-slot:hover {
+    border-color: var(--color-accent);
+  }
+  .time-selected {
+    border-color: var(--color-accent);
+    background: var(--color-accent);
+    color: var(--color-background);
   }
 
   @keyframes fade-up {
