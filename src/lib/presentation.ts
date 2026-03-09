@@ -6,6 +6,7 @@ export type PresentationState = "overlay" | "presenting" | "browsing";
 
 export const presentationState = writable<PresentationState>("overlay");
 export const currentSectionIndex = writable(0);
+export const presentationPaused = writable(false);
 
 /** Default dwell time per section when no audio is available */
 const DEFAULT_DWELL_MS = 15000;
@@ -141,6 +142,17 @@ async function tryPlayNarration(sectionId: string): Promise<boolean> {
 function waitForNarrationEnd(): Promise<void> {
   return new Promise((resolve) => {
     if (!get(isPlaying)) {
+      // If paused, wait for resume before resolving
+      if (get(presentationPaused)) {
+        const unsub = presentationPaused.subscribe((paused) => {
+          if (!paused) {
+            unsub();
+            resolve();
+          }
+        });
+        activeUnsubscribes.push(unsub);
+        return;
+      }
       resolve();
       return;
     }
@@ -148,7 +160,8 @@ function waitForNarrationEnd(): Promise<void> {
     let resolved = false;
 
     const unsubscribe = isPlaying.subscribe((playing) => {
-      if (!playing && !resolved) {
+      // Only advance if audio ended AND we're not paused
+      if (!playing && !resolved && !get(presentationPaused)) {
         resolved = true;
         unsubscribe();
         resolve();
@@ -217,12 +230,38 @@ async function runPresentation() {
   }, 500);
 }
 
+/**
+ * Sleep that respects pause state. If paused, waits until resumed before
+ * starting the timer.
+ */
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => addTimer(resolve, ms));
+  return new Promise((resolve) => {
+    function start() {
+      if (get(presentationPaused)) {
+        // Wait for unpause
+        const unsub = presentationPaused.subscribe((paused) => {
+          if (!paused) {
+            unsub();
+            addTimer(resolve, ms);
+          }
+        });
+        activeUnsubscribes.push(unsub);
+      } else {
+        addTimer(resolve, ms);
+      }
+    }
+    start();
+  });
+}
+
+export function togglePresentationPause() {
+  const paused = get(presentationPaused);
+  presentationPaused.set(!paused);
 }
 
 export function startPresentation() {
   clearAllTimers();
+  presentationPaused.set(false);
   presentationState.set("presenting");
   document.body.classList.remove("overlay-active");
   document.body.classList.add("presentation-active");
@@ -244,6 +283,7 @@ export function startPresentation() {
 
 export function exitPresentation() {
   clearAllTimers();
+  presentationPaused.set(false);
   presentationState.set("browsing");
   document.body.classList.remove("presentation-active");
   document.documentElement.classList.remove("pres-no-scrollbar");

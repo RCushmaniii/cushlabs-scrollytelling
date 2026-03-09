@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { currentLang, languages } from "@/lib/i18n";
   import { isPlaying, togglePlayback, audioEnabled } from "@/lib/audio";
-  import { presentationState } from "@/lib/presentation";
+  import { presentationState, presentationPaused } from "@/lib/presentation";
 
   let activeLang = $state("en");
   let playing = $state(false);
@@ -43,8 +43,8 @@
       <div class="flex items-center gap-2">
         <button
           class="nav-btn w-9 h-9 flex items-center justify-center rounded-full transition-all duration-300"
-          onclick={togglePlayback}
-          aria-label={playing ? "Pause narration" : "Play narration"}
+          onclick={() => { togglePlayback(); if (presState === "presenting") { import("@/lib/presentation").then(m => m.togglePresentationPause()); } }}
+          aria-label={playing ? "Pause" : "Play"}
         >
           {#if playing}
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">

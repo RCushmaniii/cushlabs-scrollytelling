@@ -1,10 +1,14 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { presentationState } from "@/lib/presentation";
 
   let atBottom = $state(false);
   let scrolledPastHero = $state(false);
+  let presenting = $state(false);
 
   onMount(() => {
+    const unsub = presentationState.subscribe((s) => { presenting = s === "presenting"; });
+
     function checkScroll() {
       const scrollMax = document.documentElement.scrollHeight - window.innerHeight;
       atBottom = window.scrollY >= scrollMax - 100;
@@ -12,7 +16,7 @@
     }
     window.addEventListener("scroll", checkScroll, { passive: true });
     checkScroll();
-    return () => window.removeEventListener("scroll", checkScroll);
+    return () => { window.removeEventListener("scroll", checkScroll); unsub(); };
   });
 
   function handleClick() {
@@ -37,6 +41,7 @@
   }
 </script>
 
+{#if !presenting}
 <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2">
   {#if !scrolledPastHero}
     <span class="scroll-label text-xs text-[var(--color-text-muted)] opacity-60 transition-opacity duration-500">
@@ -64,6 +69,7 @@
     </span>
   {/if}
 </div>
+{/if}
 
 <style>
   .scroll-arrow {
