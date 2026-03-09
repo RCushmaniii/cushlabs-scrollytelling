@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { currentLang, languages } from "@/lib/i18n";
   import { isPlaying, togglePlayback, audioEnabled } from "@/lib/audio";
-  import { presentationState, presentationPaused } from "@/lib/presentation";
+  import { presentationState, togglePresentationPlayback } from "@/lib/presentation";
 
   let activeLang = $state("en");
   let playing = $state(false);
@@ -11,17 +11,22 @@
   let scrolled = $state(false);
 
   onMount(() => {
-    currentLang.subscribe((lang) => { activeLang = lang; });
-    isPlaying.subscribe((val) => { playing = val; });
-    audioEnabled.subscribe((val) => { hasAudio = val; });
-    presentationState.subscribe((s) => { presState = s; });
+    const unsubs = [
+      currentLang.subscribe((lang) => { activeLang = lang; }),
+      isPlaying.subscribe((val) => { playing = val; }),
+      audioEnabled.subscribe((val) => { hasAudio = val; }),
+      presentationState.subscribe((s) => { presState = s; }),
+    ];
     currentLang.set(activeLang);
 
     function onScroll() {
       scrolled = window.scrollY > 20;
     }
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      unsubs.forEach((u) => u());
+      window.removeEventListener("scroll", onScroll);
+    };
   });
 
   function switchLang(code: string) {
@@ -30,6 +35,16 @@
 
   function exitPres() {
     import("@/lib/presentation").then(m => m.exitPresentation());
+  }
+
+  function handlePlayPause() {
+    if (presState === "presenting") {
+      // Atomic: pauses/resumes both audio AND presentation auto-advance
+      togglePresentationPlayback();
+    } else {
+      // Browse mode: just toggle audio
+      togglePlayback();
+    }
   }
 </script>
 
@@ -43,7 +58,7 @@
       <div class="flex items-center gap-2">
         <button
           class="nav-btn w-9 h-9 flex items-center justify-center rounded-full transition-all duration-300"
-          onclick={() => { togglePlayback(); if (presState === "presenting") { import("@/lib/presentation").then(m => m.togglePresentationPause()); } }}
+          onclick={handlePlayPause}
           aria-label={playing ? "Pause" : "Play"}
         >
           {#if playing}

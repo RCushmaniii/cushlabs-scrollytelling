@@ -1,5 +1,5 @@
 import { writable, get } from "svelte/store";
-import { playSection, stopAll, isPlaying } from "./audio";
+import { playSection, stopAll, isPlaying, togglePlayback } from "./audio";
 import { currentLang } from "./i18n";
 
 export type PresentationState = "overlay" | "presenting" | "browsing";
@@ -89,14 +89,17 @@ function addTimer(fn: () => void, ms: number): number {
   return id;
 }
 
+function removeTimer(id: number) {
+  clearTimeout(id);
+  activeTimers = activeTimers.filter((t) => t !== id);
+}
+
 /**
  * Smoothly scroll to a section and wait for the scroll to finish.
  */
 function scrollToSection(el: HTMLElement): Promise<void> {
   return new Promise((resolve) => {
     el.scrollIntoView({ behavior: "smooth" });
-    // scrollIntoView doesn't have a callback — use a timeout
-    // based on estimated scroll distance
     const distance = Math.abs(el.getBoundingClientRect().top);
     const estimatedMs = Math.min(Math.max(distance * 0.5, 400), 1500);
     setTimeout(resolve, estimatedMs);
@@ -128,7 +131,6 @@ async function playBridge(fromId: string, toId: string): Promise<void> {
 async function tryPlayNarration(sectionId: string): Promise<boolean> {
   try {
     await playSection(sectionId);
-    // Check if audio actually started (playSection silently fails if no file)
     return get(isPlaying);
   } catch {
     return false;
@@ -136,47 +138,45 @@ async function tryPlayNarration(sectionId: string): Promise<boolean> {
 }
 
 /**
- * Wait for narration to finish, or time out.
- * Returns immediately if no narration is playing.
+ * Wait for narration to finish. Correctly handles pause/resume cycles:
+ * - If paused, blocks until resumed, then re-checks if narration is still playing
+ * - Only resolves when narration truly ends (isPlaying goes false while not paused)
+ * - Times out after MAX_NARRATION_WAIT_MS as safety net
  */
 function waitForNarrationEnd(): Promise<void> {
   return new Promise((resolve) => {
-    if (!get(isPlaying)) {
-      // If paused, wait for resume before resolving
-      if (get(presentationPaused)) {
-        const unsub = presentationPaused.subscribe((paused) => {
-          if (!paused) {
-            unsub();
-            resolve();
-          }
-        });
-        activeUnsubscribes.push(unsub);
-        return;
-      }
-      resolve();
-      return;
-    }
-
     let resolved = false;
 
-    const unsubscribe = isPlaying.subscribe((playing) => {
-      // Only advance if audio ended AND we're not paused
-      if (!playing && !resolved && !get(presentationPaused)) {
-        resolved = true;
-        unsubscribe();
-        resolve();
+    function done() {
+      if (resolved) return;
+      resolved = true;
+      playUnsub();
+      pauseUnsub();
+      resolve();
+    }
+
+    // Watch isPlaying — but only resolve if we're NOT paused
+    const playUnsub = isPlaying.subscribe((playing) => {
+      if (resolved) return;
+      if (!playing && !get(presentationPaused)) {
+        done();
       }
     });
-    activeUnsubscribes.push(unsubscribe);
+    activeUnsubscribes.push(playUnsub);
 
-    // Fallback: don't wait forever
-    addTimer(() => {
-      if (!resolved) {
-        resolved = true;
-        unsubscribe();
-        resolve();
+    // Watch pause state — when resuming, re-check if narration is still going
+    const pauseUnsub = presentationPaused.subscribe((paused) => {
+      if (resolved) return;
+      if (!paused && !get(isPlaying)) {
+        // Resumed but audio already ended while paused — advance now
+        done();
       }
-    }, MAX_NARRATION_WAIT_MS);
+      // If resumed and audio is still playing, do nothing — let playUnsub handle it
+    });
+    activeUnsubscribes.push(pauseUnsub);
+
+    // Safety timeout
+    addTimer(() => { done(); }, MAX_NARRATION_WAIT_MS);
   });
 }
 
@@ -194,12 +194,10 @@ async function runPresentation() {
 
     // Scroll to section (first section is already visible)
     if (i > 0) {
-      // Play bridge audio between sections if one exists
       await playBridge(sections[i - 1].id, sections[i].id);
       if (get(presentationState) !== "presenting") return;
 
       await scrollToSection(sections[i]);
-      // Allow scroll animations to settle
       await sleep(POST_SCROLL_SETTLE_MS);
     }
 
@@ -209,19 +207,17 @@ async function runPresentation() {
     const hasAudio = await tryPlayNarration(sections[i].id);
 
     if (hasAudio) {
-      // Wait for narration to finish, then pause briefly before advancing
       await waitForNarrationEnd();
       if (get(presentationState) !== "presenting") return;
       await sleep(POST_NARRATION_PAUSE_MS);
     } else {
-      // No audio — dwell based on section complexity
       const sectionId = sections[i].id;
       const dwell = SECTION_DWELL_MS[sectionId] ?? DEFAULT_DWELL_MS;
       await sleep(dwell);
     }
   }
 
-  // Presentation complete — brief pause then navigate to consultation
+  // Presentation complete
   if (get(presentationState) !== "presenting") return;
   await sleep(2000);
   exitPresentation();
@@ -231,32 +227,93 @@ async function runPresentation() {
 }
 
 /**
- * Sleep that respects pause state. If paused, waits until resumed before
- * starting the timer.
+ * Pause-aware sleep. Tracks remaining time so pause/resume cycles work correctly.
+ * If paused mid-sleep, the timer is cleared and remaining time is preserved.
+ * On resume, a new timer fires with the remaining duration.
  */
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
-    function start() {
-      if (get(presentationPaused)) {
-        // Wait for unpause
-        const unsub = presentationPaused.subscribe((paused) => {
-          if (!paused) {
-            unsub();
-            addTimer(resolve, ms);
-          }
-        });
-        activeUnsubscribes.push(unsub);
-      } else {
-        addTimer(resolve, ms);
-      }
+    if (get(presentationState) !== "presenting") {
+      resolve();
+      return;
     }
-    start();
+
+    let remaining = ms;
+    let startedAt = Date.now();
+    let timerId: number | null = null;
+    let pauseUnsub: (() => void) | null = null;
+    let resolved = false;
+
+    function done() {
+      if (resolved) return;
+      resolved = true;
+      if (timerId !== null) removeTimer(timerId);
+      if (pauseUnsub) pauseUnsub();
+      resolve();
+    }
+
+    function startTimer() {
+      if (resolved) return;
+      if (get(presentationPaused)) {
+        // Don't start timer while paused — wait for resume
+        return;
+      }
+      startedAt = Date.now();
+      timerId = addTimer(done, remaining);
+    }
+
+    // Subscribe to pause changes
+    pauseUnsub = presentationPaused.subscribe((paused) => {
+      if (resolved) return;
+      if (paused) {
+        // Paused — clear running timer, save remaining time
+        if (timerId !== null) {
+          const elapsed = Date.now() - startedAt;
+          remaining = Math.max(0, remaining - elapsed);
+          removeTimer(timerId);
+          timerId = null;
+        }
+      } else {
+        // Resumed — start timer with remaining time
+        startTimer();
+      }
+    });
+    activeUnsubscribes.push(pauseUnsub);
+
+    // Kick off if not currently paused
+    startTimer();
   });
 }
 
-export function togglePresentationPause() {
-  const paused = get(presentationPaused);
-  presentationPaused.set(!paused);
+/**
+ * Single atomic toggle for pause/play during presentation.
+ * Handles both audio and presentation pause state in the same synchronous tick.
+ * This is the ONLY function the UI should call — never call togglePlayback +
+ * togglePresentationPause separately.
+ */
+export function togglePresentationPlayback() {
+  if (get(presentationState) !== "presenting") {
+    // Not in presentation mode — just toggle audio
+    togglePlayback();
+    return;
+  }
+
+  const isPaused = get(presentationPaused);
+
+  if (isPaused) {
+    // Resume: set paused=false FIRST, then resume audio
+    // This ensures waitForNarrationEnd/sleep see the correct pause state
+    // before isPlaying changes
+    presentationPaused.set(false);
+    togglePlayback(); // resumes audio, sets isPlaying=true
+  } else {
+    // Pause: pause audio FIRST, then set paused=true
+    // This ensures isPlaying goes false while paused is still false,
+    // but we immediately set paused=true before any subscriber can react
+    // to advance the presentation
+    presentationPaused.set(true);
+    togglePlayback(); // pauses audio, sets isPlaying=false
+  }
 }
 
 export function startPresentation() {
@@ -310,6 +367,7 @@ export function resetToOverlay() {
   document.body.classList.add("overlay-active");
   document.documentElement.classList.add("pres-no-scrollbar");
   window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  presentationPaused.set(false);
   presentationState.set("overlay");
 
   const hero = document.querySelector(".hero-text-container");
