@@ -8,6 +8,48 @@ export const presentationState = writable<PresentationState>("overlay");
 export const currentSectionIndex = writable(0);
 export const presentationPaused = writable(false);
 
+/**
+ * Track whether pause was triggered by the user (manual) or by tab visibility (auto).
+ * When the tab becomes visible again, we only auto-resume if the pause was auto-triggered.
+ * If the user manually paused before alt-tabbing, we respect that and stay paused.
+ */
+let pausedByVisibility = false;
+let visibilityHandler: (() => void) | null = null;
+
+function setupVisibilityHandler() {
+  if (visibilityHandler) return; // Already set up
+
+  visibilityHandler = () => {
+    if (get(presentationState) !== "presenting") return;
+
+    if (document.hidden) {
+      // Tab lost focus — auto-pause if not already paused
+      if (!get(presentationPaused)) {
+        pausedByVisibility = true;
+        presentationPaused.set(true);
+        togglePlayback(); // pause audio
+      }
+    } else {
+      // Tab regained focus — auto-resume only if we auto-paused
+      if (pausedByVisibility && get(presentationPaused)) {
+        pausedByVisibility = false;
+        presentationPaused.set(false);
+        togglePlayback(); // resume audio
+      }
+    }
+  };
+
+  document.addEventListener("visibilitychange", visibilityHandler);
+}
+
+function teardownVisibilityHandler() {
+  if (visibilityHandler) {
+    document.removeEventListener("visibilitychange", visibilityHandler);
+    visibilityHandler = null;
+  }
+  pausedByVisibility = false;
+}
+
 /** Default dwell time per section when no audio is available */
 const DEFAULT_DWELL_MS = 15000;
 /** Per-section overrides — content-heavy sections get more time */
@@ -298,19 +340,17 @@ export function togglePresentationPlayback() {
     return;
   }
 
+  // Manual toggle always clears the visibility-auto-pause flag
+  pausedByVisibility = false;
+
   const isPaused = get(presentationPaused);
 
   if (isPaused) {
     // Resume: set paused=false FIRST, then resume audio
-    // This ensures waitForNarrationEnd/sleep see the correct pause state
-    // before isPlaying changes
     presentationPaused.set(false);
     togglePlayback(); // resumes audio, sets isPlaying=true
   } else {
-    // Pause: pause audio FIRST, then set paused=true
-    // This ensures isPlaying goes false while paused is still false,
-    // but we immediately set paused=true before any subscriber can react
-    // to advance the presentation
+    // Pause: set paused=true FIRST, then pause audio
     presentationPaused.set(true);
     togglePlayback(); // pauses audio, sets isPlaying=false
   }
@@ -330,6 +370,9 @@ export function startPresentation() {
   // Lock scroll
   lockScroll();
 
+  // Auto-pause when tab loses focus, resume when it comes back
+  setupVisibilityHandler();
+
   // Trigger hero animation
   const hero = document.querySelector(".hero-text-container");
   if (hero) hero.classList.add("hero-text-ready");
@@ -340,6 +383,7 @@ export function startPresentation() {
 
 export function exitPresentation() {
   clearAllTimers();
+  teardownVisibilityHandler();
   presentationPaused.set(false);
   presentationState.set("browsing");
   document.body.classList.remove("presentation-active");
@@ -361,6 +405,7 @@ export function viewSiteMode() {
 
 export function resetToOverlay() {
   clearAllTimers();
+  teardownVisibilityHandler();
   stopAll();
   unlockScroll();
   document.body.classList.remove("presentation-active");
