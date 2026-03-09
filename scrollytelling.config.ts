@@ -8,7 +8,7 @@ export const config = {
   site: {
     title: "CushLabs Scrollytelling",
     description: "A cinematic scrollytelling pitch deck",
-    url: "https://cushlabs-scrollytelling.vercel.app",
+    url: "https://scrollytelling.cushlabs.ai",
   },
 
   colors: {
