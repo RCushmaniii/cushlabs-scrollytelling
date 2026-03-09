@@ -1,0 +1,74 @@
+---
+import { config } from "../../scrollytelling.config.ts";
+import "@/styles/base.css";
+
+const defaultLang = config.languages.find((l) => l.default)?.code ?? "en";
+---
+
+<!doctype html>
+<html lang={defaultLang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Page not found" />
+    <title>Page Not Found — {config.site.title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href={config.fonts.googleFontsUrl} rel="stylesheet" />
+    <style define:vars={{
+      "font-heading": config.fonts.heading,
+      "font-body": config.fonts.body,
+      "font-mono": config.fonts.mono,
+      "color-accent": config.colors.accent,
+      "color-background": config.colors.background,
+      "color-text": config.colors.text,
+      "color-text-muted": config.colors.textMuted,
+    }}>
+    </style>
+  </head>
+  <body class="min-h-screen flex items-center justify-center px-6" style="background: var(--color-background); color: var(--color-text); font-family: var(--font-body);">
+    <div class="text-center max-w-lg animate-fade-up">
+      <p class="font-mono text-sm tracking-[0.2em] uppercase mb-6" style="color: var(--color-accent); font-family: var(--font-mono);">
+        404
+      </p>
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4" style="font-family: var(--font-heading);">
+        Page Not Found
+      </h1>
+      <p class="text-lg leading-relaxed mb-10" style="color: var(--color-text-muted);">
+        The page you're looking for doesn't exist or has been moved.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a
+          href="/"
+          class="inline-flex items-center gap-2 px-8 py-3 rounded-xl font-semibold text-sm transition-all duration-300 hover:-translate-y-0.5"
+          style="background: var(--color-accent); color: var(--color-background);"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to Home
+        </a>
+        <a
+          href="/consultation"
+          class="inline-flex items-center gap-2 px-8 py-3 rounded-xl font-semibold text-sm border transition-all duration-300 hover:-translate-y-0.5"
+          style="border-color: rgba(255,255,255,0.1); color: var(--color-text-muted);"
+          onmouseover="this.style.borderColor='var(--color-accent)';this.style.color='var(--color-accent)'"
+          onmouseout="this.style.borderColor='rgba(255,255,255,0.1)';this.style.color='var(--color-text-muted)'"
+        >
+          Book a Consultation
+        </a>
+      </div>
+    </div>
+
+    <style>
+      @keyframes fade-up {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .animate-fade-up {
+        animation: fade-up 0.6s ease-out;
+      }
+    </style>
+  </body>
+</html>

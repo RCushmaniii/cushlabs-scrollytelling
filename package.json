@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "CushLabs cinematic scrollytelling template for pitch decks",
   "license": "SEE LICENSE IN LICENSE",
-  "author": "Robert Cushman <info@cushlabs.ai>",
+  "author": "Robert Cushman",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",

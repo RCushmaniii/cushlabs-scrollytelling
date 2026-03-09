@@ -139,7 +139,6 @@ pnpm preview  # Preview production build locally
 Business Solution Architect & Full-Stack Developer
 Guadalajara, Mexico
 
-info@cushlabs.ai
 [GitHub](https://github.com/RCushmaniii) | [LinkedIn](https://linkedin.com/in/robertcushman) | [Portfolio](https://cushlabs.ai)
 
 ## License
