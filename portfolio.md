@@ -1,18 +1,76 @@
 ---
-# =============================================================================
-# PORTFOLIO.MD — CushLabs Scrollytelling
-# =============================================================================
+# === CONTROL FLAGS ===
 portfolio_enabled: true
 portfolio_priority: 3
 portfolio_featured: true
-portfolio_last_reviewed: "2026-03-06"
 
-title: "CushLabs Scrollytelling Template"
-tagline: "Cinematic, bilingual scrollytelling pitch decks that feel like cinema — not slides"
+# === CARD DISPLAY ===
+title: "CushLabs Scrollytelling"
+tagline: "Cinematic bilingual pitch decks that win attention"
 slug: "cushlabs-scrollytelling"
-
 category: "Templates"
-target_audience: "Founders, consultants, and agencies who need pitch decks that win attention"
+tech_stack:
+  - "Astro 5"
+  - "Svelte 5"
+  - "Tailwind CSS 3"
+  - "TypeScript"
+  - "Vercel"
+thumbnail: "/images/portfolio/cushlabs-scrollytelling-thumb.webp"
+status: "Production"
+
+# === DETAIL PAGE ===
+problem: "Traditional pitch decks are forgettable — investors see hundreds of static slide presentations every month. Custom scrollytelling experiences take weeks to build and produce one-off code that can't be reused."
+solution: "A config-driven Astro template with dual-mode interaction: auto-narrated presentation mode for board meetings and free-browse mode for due diligence. New pitch decks ship in hours, not weeks."
+key_features:
+  - "Presentation mode with scroll-lock, auto-advance, and synchronized narration"
+  - "Instant EN/ES language switching without page reloads"
+  - "Config-driven theming — colors, fonts, and content from a single TypeScript file"
+  - "98 Lighthouse performance score with Astro islands architecture"
+  - "Mobile-responsive with scroll-snap carousels and touch support"
+
+# === MEDIA: PORTFOLIO SLIDES ===
+slides:
+  - src: "/images/portfolio/cushlabs-scrollytelling-01.webp"
+    alt_en: "Opening overlay with presentation mode and browse freely options"
+    alt_es: "Pantalla de inicio con opciones de modo presentacion y navegacion libre"
+  - src: "/images/portfolio/cushlabs-scrollytelling-02.webp"
+    alt_en: "Hero section with animated headline and cinematic typography"
+    alt_es: "Seccion principal con titulo animado y tipografia cinematica"
+  - src: "/images/portfolio/cushlabs-scrollytelling-03.webp"
+    alt_en: "Problem statement section with typewriter text animation"
+    alt_es: "Seccion del problema con animacion de texto tipo maquina de escribir"
+  - src: "/images/portfolio/cushlabs-scrollytelling-04.webp"
+    alt_en: "Solution section with Matrix rain effect and feature cards"
+    alt_es: "Seccion de solucion con efecto Matrix y tarjetas de caracteristicas"
+  - src: "/images/portfolio/cushlabs-scrollytelling-05.webp"
+    alt_en: "Feature cards showcasing presentation mode and bilingual support"
+    alt_es: "Tarjetas de caracteristicas mostrando modo presentacion y soporte bilingue"
+  - src: "/images/portfolio/cushlabs-scrollytelling-06.webp"
+    alt_en: "Proof section with testimonial quote and evidence"
+    alt_es: "Seccion de prueba con cita testimonial y evidencia"
+  - src: "/images/portfolio/cushlabs-scrollytelling-07.webp"
+    alt_en: "Call-to-action section with consultation booking prompt"
+    alt_es: "Seccion de llamada a la accion con invitacion a agendar consulta"
+  - src: "/images/portfolio/cushlabs-scrollytelling-08.webp"
+    alt_en: "Consultation page step 1 — calendar date and time selection"
+    alt_es: "Pagina de consulta paso 1 — seleccion de fecha y hora en calendario"
+  - src: "/images/portfolio/cushlabs-scrollytelling-09.webp"
+    alt_en: "Consultation page step 2 — contact information form"
+    alt_es: "Pagina de consulta paso 2 — formulario de informacion de contacto"
+  - src: "/images/portfolio/cushlabs-scrollytelling-10.webp"
+    alt_en: "Consultation page step 3 — booking confirmation summary"
+    alt_es: "Pagina de consulta paso 3 — resumen de confirmacion de reserva"
+
+# === MEDIA: VIDEO ===
+video_url: "/video/cushlabs-scrollytelling-brief.mp4"
+video_poster: "/images/portfolio/cushlabs-scrollytelling-brief-poster.webp"
+
+# === LINKS ===
+demo_url: "https://cushlabs-scrollytelling.vercel.app"
+live_url: "https://cushlabs-scrollytelling.vercel.app"
+
+# === OPTIONAL ===
+date_completed: "2026-03"
 tags:
   - "scrollytelling"
   - "pitch-deck"
@@ -22,113 +80,4 @@ tags:
   - "presentation-mode"
   - "cinematic"
   - "tailwind-css"
-
-thumbnail: "/images/scrollytelling-thumbnail.jpg"
-hero_images:
-  - "/images/scrollytelling-hero.jpg"
-  - "/images/scrollytelling-presentation-mode.jpg"
-  - "/images/scrollytelling-mobile.jpg"
-demo_video_url: ""
-
-live_url: "https://cushlabs-scrollytelling.vercel.app"
-demo_url: "https://cushlabs-scrollytelling.vercel.app"
-case_study_url: ""
-
-problem_solved: |
-  Traditional pitch decks are forgettable — investors see hundreds of slide-based
-  presentations every month. Scrollytelling pitch decks combine the narrative power
-  of cinema with the interactivity of the web, creating presentations that leave a
-  lasting impression. This template makes that accessible without writing 3,000 lines
-  of HTML from scratch every time.
-
-key_outcomes:
-  - "Full presentation mode with auto-narration and scroll-lock — no manual clicking"
-  - "Instant EN/ES language switching in both browse and presentation modes"
-  - "Config-driven customization — new pitch deck in hours, not days"
-  - "98 Lighthouse performance score with Astro islands architecture"
-  - "Mobile-responsive with scroll-snap carousels and touch support"
-  - "Accessible: reduced-motion, ARIA labels, keyboard navigation"
-
-tech_stack:
-  - "Astro 5"
-  - "Svelte 5"
-  - "Tailwind CSS 3"
-  - "MDX"
-  - "TypeScript"
-  - "Vercel"
-  - "IntersectionObserver API"
-  - "Web Audio API"
-
-complexity: "Production"
 ---
-
-## Overview
-
-CushLabs Scrollytelling is a production-grade template for building cinematic, bilingual
-pitch decks as scrollytelling websites. Born from the atlas-biodiversidad-pitch project — a
-single 3,000-line HTML file that worked brilliantly but couldn't be reused — this template
-extracts every feature into a configurable, component-driven Astro architecture.
-
-The template ships with two interaction modes: a free-browse scrolling experience and a
-presentation mode that locks scroll, auto-advances through sections, and plays synchronized
-narration. Both modes support instant language switching between English and Spanish
-(extensible to any number of languages).
-
-Everything is driven from a single `scrollytelling.config.ts` file — colors, fonts,
-languages, audio settings, and visual effects. New pitch decks are created by editing
-config and writing MDX content files, without touching CSS or JavaScript internals.
-
-## The Challenge
-
-- **Pitch decks are forgettable:** 92% of investors say storytelling influences their
-  decision, yet most pitches are static slides that fail to create emotional connection
-- **Custom scrollytelling is expensive:** Building a cinematic web experience from scratch
-  takes weeks and produces a one-off that can't be reused for the next client
-- **Bilingual audiences need instant switching:** Route-based i18n breaks the immersive
-  flow — users need to toggle languages without page reloads or losing their place
-- **Presentation vs self-guided:** Some contexts need auto-play narration (board meetings),
-  others need free exploration (investor due diligence) — one site must serve both
-
-## The Solution
-
-**Component architecture with Astro islands:**
-Svelte components handle only interactive elements (language toggle, audio controls,
-animated counters). Everything else renders as static HTML/CSS for near-instant loading.
-
-**Dual-mode experience:**
-An opening overlay lets users choose "Play Presentation" (scroll-locked, auto-narrated)
-or "Browse Freely" (normal scrolling). Both modes work in all supported languages.
-
-**Config-driven theming:**
-One TypeScript config file drives Tailwind colors, Astro layout variables, and Svelte
-component behavior. Swap colors and fonts without touching a single component file.
-
-**MDX content authoring:**
-Each narrative section is a standalone MDX file with bilingual content blocks. Svelte
-components (counters, carousels) can be embedded directly in markdown.
-
-## Technical Highlights
-
-- **Presentation mode engine:** Scroll-lock, auto-advance, narration sync with crossfade
-  transitions and ambient audio intro — all coordinated through a central state machine
-- **CSS-first reveal system:** IntersectionObserver adds/removes `.visible` classes, keeping
-  JS bundle tiny while supporting repeatable animations on scroll
-- **Data-lang CSS toggle:** All bilingual content in the DOM simultaneously, toggled via
-  CSS selectors on `body[data-active-lang]` — instant switching, works offline
-- **Ambient audio system:** Rain/ambient intro fades to section narration, language-aware
-  audio paths, preload on first interaction to respect autoplay policies
-- **Mobile carousels:** Grid on desktop, `scroll-snap` with dot navigation on mobile,
-  auto-cycling during presentation mode narration segments
-
-## Results
-
-**For the End User:**
-- New pitch deck can be configured and content-authored in a single afternoon
-- Presentation mode eliminates the need for separate slideshow tools
-- Bilingual support opens Latin American and US markets from a single deployment
-
-**Technical Demonstration:**
-- Astro islands architecture achieving near-zero JS for static content
-- Complex state coordination (presentation mode, audio, language, scroll) without a
-  heavy framework
-- Production template design: config-driven, component-based, documented, deployable
