@@ -26,7 +26,7 @@ This template solves that by making cinematic pitch decks as easy as editing a c
 
 ## The Solution
 
-**Astro islands architecture** — 95% of the page is static HTML/CSS. Only interactive elements (toggles, counters, audio controls) ship JavaScript. The result is near-instant page loads with cinematic interactivity where it matters.
+**Astro islands architecture** — 95% of all pages are static HTML/CSS. Only interactive elements (toggles, counters, audio controls) ship JavaScript. The result is near-instant page loads with cinematic interactivity where it matters.
 
 **Dual-mode experience** — An opening overlay offers "Play Presentation" or "Browse Freely." Presentation mode locks scroll, auto-advances through sections, plays synchronized narration with ambient audio intro, and opens a CTA modal at the end. Browse mode enables normal scrolling with all visual effects and interactions.
 
@@ -125,13 +125,13 @@ pnpm preview  # Preview production build locally
 
 ## Results
 
-| Metric | Value |
-|--------|-------|
-| Lighthouse Performance | 98+ |
-| First Contentful Paint | < 1s |
-| Total JS (islands only) | ~25 KB gzipped |
-| Time to new pitch deck | Hours, not days |
-| Languages supported | Configurable (EN/ES default) |
+| Metric                  | Value                        |
+| ----------------------- | ---------------------------- |
+| Lighthouse Performance  | 98+                          |
+| First Contentful Paint  | < 1s                         |
+| Total JS (islands only) | ~25 KB gzipped               |
+| Time to new pitch deck  | Hours, not days              |
+| Languages supported     | Configurable (EN/ES default) |
 
 ## Contact
 
@@ -147,4 +147,4 @@ Guadalajara, Mexico
 
 ---
 
-*Last Updated: 2026-03-06*
+_Last Updated: 2026-03-06_
