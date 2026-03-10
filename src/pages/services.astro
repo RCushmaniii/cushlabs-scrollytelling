@@ -1,0 +1,12 @@
+---
+import PageLayout from "@/layouts/PageLayout.astro";
+import PageNavbar from "@/components/ui/PageNavbar.svelte";
+import Footer from "@/components/ui/Footer.svelte";
+import ServicesPage from "@/components/pages/ServicesPage.svelte";
+---
+
+<PageLayout title="Services — CushLabs AI Services" description="Cinematic scrollytelling presentations that pitch for you. Perfect for founders, async teams, and anyone tired of death by slide deck.">
+  <PageNavbar slot="navbar" client:load />
+  <ServicesPage client:load />
+  <Footer slot="footer" client:load />
+</PageLayout>

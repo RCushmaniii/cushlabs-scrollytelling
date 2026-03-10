@@ -92,6 +92,7 @@
         </h4>
         <ul class="space-y-2.5">
           <li><a href="/" class="footer-link">{i("home")}</a></li>
+          <li><a href="/services" class="footer-link">{i("services")}</a></li>
           <li><a href="/contact" class="footer-link">{i("contact")}</a></li>
           <li><a href="/consultation" class="footer-link">{i("consultation")}</a></li>
           <li>

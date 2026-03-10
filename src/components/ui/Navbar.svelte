@@ -74,7 +74,7 @@
         </button>
       </div>
 
-      <!-- Right: exit presentation + language toggle -->
+      <!-- Right: nav links (browse) / exit (presenting) + language toggle -->
       <div class="flex items-center gap-2">
         {#if presState === "presenting"}
           <button
@@ -84,6 +84,16 @@
             <span data-lang="en" class="active">Exit</span>
             <span data-lang="es">Salir</span>
           </button>
+        {/if}
+        {#if presState === "browsing"}
+          <a href="/services" class="nav-btn px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-300 no-underline">
+            <span data-lang="en" class="active">Services</span>
+            <span data-lang="es">Servicios</span>
+          </a>
+          <a href="/consultation" class="nav-btn-cta px-3 py-1.5 text-xs font-medium rounded-full transition-all duration-300 no-underline">
+            <span data-lang="en" class="active">Book a Call</span>
+            <span data-lang="es">Reservar</span>
+          </a>
         {/if}
 
         <div class="flex gap-0.5 bg-black/40 backdrop-blur-md rounded-full p-0.5 border border-white/10">
@@ -121,6 +131,15 @@
   .nav-btn:hover {
     color: var(--color-accent);
     background: rgba(0, 0, 0, 0.6);
+  }
+
+  .nav-btn-cta {
+    color: var(--color-background);
+    background: var(--color-accent);
+    border: 1px solid var(--color-accent);
+  }
+  .nav-btn-cta:hover {
+    opacity: 0.85;
   }
 
   .lang-btn {

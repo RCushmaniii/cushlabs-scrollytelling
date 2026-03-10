@@ -21,10 +21,21 @@
     </a>
 
     <div class="flex items-center gap-4">
-      <!-- Back to presentation -->
+      <a
+        href="/services"
+        class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors hidden sm:inline"
+      >
+        {activeLang === "es" ? "Servicios" : "Services"}
+      </a>
+      <a
+        href="/consultation"
+        class="text-xs font-semibold text-[var(--color-accent)] hover:opacity-80 transition-opacity"
+      >
+        {activeLang === "es" ? "Reservar Llamada" : "Book a Call"}
+      </a>
       <a
         href="/"
-        class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors"
+        class="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors hidden sm:inline"
       >
         {activeLang === "es" ? "Ver Presentacion" : "View Presentation"}
       </a>
