@@ -180,7 +180,13 @@
     }, { threshold: 0.1 });
     intObs.observe(el);
 
-    return () => { reset(); unsub(); mutObs.disconnect(); intObs.disconnect(); };
+    // Restart animations when tab returns during presentation
+    function handleRestart() {
+      if (running) startSequence();
+    }
+    window.addEventListener("presentation:restart-section", handleRestart);
+
+    return () => { reset(); unsub(); mutObs.disconnect(); intObs.disconnect(); window.removeEventListener("presentation:restart-section", handleRestart); };
   });
 
   function charStyle(done: boolean, type: 'headline' | 'intro' | 'accent' | 'text'): string {

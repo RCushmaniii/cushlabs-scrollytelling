@@ -14,6 +14,12 @@ export const presentationPaused = writable(false);
  * If the user manually paused before alt-tabbing, we respect that and stay paused.
  */
 let pausedByVisibility = false;
+
+/**
+ * Flag set during section restart (tab-back). Prevents waitForNarrationEnd from
+ * resolving prematurely in the gap between stopAll() and the new playSection().
+ */
+let restartingSection = false;
 let visibilityHandler: (() => void) | null = null;
 
 function setupVisibilityHandler() {
@@ -30,11 +36,32 @@ function setupVisibilityHandler() {
         togglePlayback(); // pause audio
       }
     } else {
-      // Tab regained focus — auto-resume only if we auto-paused
+      // Tab regained focus — restart current section from scratch
+      // so audio and animations are perfectly synced
       if (pausedByVisibility && get(presentationPaused)) {
         pausedByVisibility = false;
-        presentationPaused.set(false);
-        togglePlayback(); // resume audio
+        restartingSection = true;
+
+        // Stop current audio completely (don't just resume mid-track)
+        stopAll();
+
+        // Tell sequence components to restart their animations
+        window.dispatchEvent(new CustomEvent("presentation:restart-section"));
+
+        // Re-play narration for the current section from the beginning
+        const sections = getSections();
+        const idx = get(currentSectionIndex);
+        if (sections[idx]) {
+          playSection(sections[idx].id).then(() => {
+            // Only unpause after narration has started (or failed to start)
+            // This prevents waitForNarrationEnd from resolving in the gap
+            restartingSection = false;
+            presentationPaused.set(false);
+          });
+        } else {
+          restartingSection = false;
+          presentationPaused.set(false);
+        }
       }
     }
   };
@@ -197,10 +224,10 @@ function waitForNarrationEnd(): Promise<void> {
       resolve();
     }
 
-    // Watch isPlaying — but only resolve if we're NOT paused
+    // Watch isPlaying — but only resolve if we're NOT paused and NOT restarting
     const playUnsub = isPlaying.subscribe((playing) => {
       if (resolved) return;
-      if (!playing && !get(presentationPaused)) {
+      if (!playing && !get(presentationPaused) && !restartingSection) {
         done();
       }
     });
@@ -209,7 +236,7 @@ function waitForNarrationEnd(): Promise<void> {
     // Watch pause state — when resuming, re-check if narration is still going
     const pauseUnsub = presentationPaused.subscribe((paused) => {
       if (resolved) return;
-      if (!paused && !get(isPlaying)) {
+      if (!paused && !get(isPlaying) && !restartingSection) {
         // Resumed but audio already ended while paused — advance now
         done();
       }

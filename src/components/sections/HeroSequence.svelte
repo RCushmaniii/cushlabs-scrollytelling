@@ -117,10 +117,20 @@
       }
     });
 
+    // Restart animations when tab returns during presentation
+    function handleRestart() {
+      if (started) {
+        reset();
+        startSequence();
+      }
+    }
+    window.addEventListener("presentation:restart-section", handleRestart);
+
     return () => {
       reset();
       mutObs.disconnect();
       unsub();
+      window.removeEventListener("presentation:restart-section", handleRestart);
     };
   });
 </script>

@@ -210,11 +210,18 @@
     );
     intObs.observe(el);
 
+    // Restart animations when tab returns during presentation
+    function handleRestart() {
+      if (running) startSequence();
+    }
+    window.addEventListener("presentation:restart-section", handleRestart);
+
     return () => {
       reset();
       unsub();
       mutObs.disconnect();
       intObs.disconnect();
+      window.removeEventListener("presentation:restart-section", handleRestart);
     };
   });
 </script>
