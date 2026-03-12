@@ -64,6 +64,8 @@ slides:
 # === MEDIA: VIDEO ===
 video_url: "/video/cushlabs-scrollytelling-brief.mp4"
 video_poster: "/images/portfolio/cushlabs-scrollytelling-brief-poster.webp"
+demo_video_url: "/video/cushlabs-scrollytelling-brief.mp4"
+demo_video_poster: "/images/portfolio/cushlabs-scrollytelling-brief-poster.webp"
 
 # === LINKS ===
 demo_url: "https://cushlabs-scrollytelling.vercel.app"
