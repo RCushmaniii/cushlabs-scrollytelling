@@ -1,10 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
-  let { src, sectionId }: { src: string; sectionId: string } = $props();
+  let { src, sectionId, delay = 0 }: { src: string; sectionId: string; delay?: number } = $props();
 
   let video: HTMLVideoElement;
   let visible = $state(false);
+  let delayTimer: number | null = null;
 
   onMount(() => {
     const section = document.getElementById(sectionId);
@@ -21,8 +22,18 @@
         if (!video) return;
         if (isIn) {
           video.currentTime = 0;
-          video.play().catch(() => {});
+          if (delay > 0) {
+            delayTimer = window.setTimeout(() => {
+              video.play().catch(() => {});
+            }, delay);
+          } else {
+            video.play().catch(() => {});
+          }
         } else {
+          if (delayTimer) {
+            clearTimeout(delayTimer);
+            delayTimer = null;
+          }
           video.pause();
         }
       },
@@ -32,6 +43,7 @@
 
     return () => {
       observer.disconnect();
+      if (delayTimer) clearTimeout(delayTimer);
       if (video) video.pause();
     };
   });
