@@ -13,6 +13,8 @@ import Lightbox from "@/components/ui/Lightbox.svelte";
 import ShareButtons from "@/components/ui/ShareButtons.svelte";
 import Footer from "@/components/ui/Footer.svelte";
 import MatrixBackground from "@/components/effects/MatrixBackground.svelte";
+import VideoBackground from "@/components/ui/VideoBackground.svelte";
+import ImageBackground from "@/components/ui/ImageBackground.svelte";
 
 const sections = (await getCollection("sections")).sort(
   (a, b) => a.data.order - b.data.order
@@ -26,6 +28,10 @@ const sections = (await getCollection("sections")).sort(
   <ScrollNav slot="scroll-nav" client:load />
   <GrainOverlay slot="grain" />
   <Lightbox slot="lightbox" client:load />
+
+  <VideoBackground slot="video-bg" src="/video/the-proof-background.mp4" sectionId="proof" client:load />
+  <VideoBackground slot="video-bg" src="/video/formula1-solution.mp4" sectionId="solution" client:load />
+  <ImageBackground slot="video-bg" src="/images/checkmate-problem.webp" sectionId="problem" client:visible />
 
   <Fireflies />
   <MatrixBackground client:load />
@@ -45,7 +51,7 @@ const sections = (await getCollection("sections")).sort(
       <ContentSection
         id={section.data.id}
         number={section.data.number}
-        background={section.data.background}
+        background={["proof", "problem", "solution"].includes(section.data.id) ? "transparent" : section.data.background}
       >
         <Content />
       </ContentSection>
@@ -53,7 +59,7 @@ const sections = (await getCollection("sections")).sort(
   })}
 
   <!-- Share + Footer -->
-  <div class="py-12 px-6 text-center">
+  <div class="relative z-[2] py-12 px-6 text-center" style="background: var(--color-background)">
     <p class="text-sm text-[var(--color-text-muted)] mb-4">
       <span data-lang="en" class="active">Share this presentation</span>
       <span data-lang="es">Comparte esta presentacion</span>
@@ -66,5 +72,7 @@ const sections = (await getCollection("sections")).sort(
       />
     </div>
   </div>
-  <Footer client:visible />
+  <div class="relative z-[2]" style="background: var(--color-background)">
+    <Footer client:visible />
+  </div>
 </ScrollytellingLayout>

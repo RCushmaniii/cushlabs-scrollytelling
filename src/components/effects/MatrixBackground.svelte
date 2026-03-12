@@ -34,8 +34,7 @@
     }
     lastTime = timestamp;
 
-    ctx.fillStyle = "rgba(10, 10, 10, 0.03)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.font = `${fontSize}px monospace`;
 
     for (let i = 0; i < drops.length; i++) {
@@ -123,7 +122,7 @@
 
 <div
   bind:this={container}
-  style="position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity 1s ease;"
+  style="position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity 1s ease;mix-blend-mode:screen;"
 >
   <canvas
     bind:this={canvas}
