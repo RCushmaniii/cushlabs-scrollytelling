@@ -5,6 +5,7 @@
   let el: HTMLDivElement;
   let lang = $state("en");
   let started = $state(false);
+  let heroVisible = $state(true);
   let timeouts: ReturnType<typeof setTimeout>[] = [];
 
   // Animation states
@@ -71,6 +72,7 @@
   }
 
   function playThunder() {
+    if (!heroVisible) return;
     const sfx = new Audio("/audio/sfx/thunder.mp3");
     sfx.volume = 0.5;
     sfx.play().catch(() => {});
@@ -127,6 +129,14 @@
       }
     });
 
+    // Track hero section visibility for SFX gating
+    const heroSection = el.closest("section");
+    const visObs = heroSection ? new IntersectionObserver(
+      (entries) => { heroVisible = entries[0].isIntersecting; },
+      { threshold: 0.1 }
+    ) : null;
+    if (heroSection) visObs!.observe(heroSection);
+
     // Restart animations when tab returns during presentation
     function handleRestart() {
       if (started) {
@@ -140,6 +150,7 @@
       reset();
       mutObs.disconnect();
       unsub();
+      visObs?.disconnect();
       window.removeEventListener("presentation:restart-section", handleRestart);
     };
   });
