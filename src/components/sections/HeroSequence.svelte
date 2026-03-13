@@ -70,6 +70,12 @@
     wordGroups = [];
   }
 
+  function playThunder() {
+    const sfx = new Audio("/audio/sfx/thunder.mp3");
+    sfx.volume = 0.5;
+    sfx.play().catch(() => {});
+  }
+
   function startSequence() {
     if (started) return;
     reset();
@@ -80,7 +86,11 @@
 
     schedule(() => { eyebrowVisible = true; }, 300);
     schedule(() => { titleLine1Visible = true; }, 700);
-    schedule(() => { titleLine2Visible = true; }, 1200);
+    schedule(() => {
+      titleLine2Visible = true;
+      playThunder();
+    }, 1200);
+    schedule(() => { playThunder(); }, 1200 + 5300 + 3500);
 
     const baseDelay = 1800;
     const wordInterval = 250;
