@@ -18,7 +18,7 @@
     ]
   },
   "dependencies": {
-    "@astrojs/mdx": "^4.0.0",
+    "@astrojs/mdx": "^4.3.14",
     "@astrojs/svelte": "^7.0.0",
     "@astrojs/tailwind": "^6.0.0",
     "@astrojs/vercel": "^8.0.0",
