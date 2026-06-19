@@ -68,8 +68,8 @@ demo_video_url: "/video/cushlabs-scrollytelling-brief.mp4"
 demo_video_poster: "/images/portfolio/cushlabs-scrollytelling-brief-poster.webp"
 
 # === LINKS ===
-demo_url: "https://cushlabs-scrollytelling.vercel.app"
-live_url: "https://cushlabs-scrollytelling.vercel.app"
+demo_url: "https://scrollytelling.cushlabs.ai"
+live_url: "https://scrollytelling.cushlabs.ai"
 
 # === OPTIONAL ===
 date_completed: "2026-03"
