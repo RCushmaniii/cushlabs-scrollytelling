@@ -1,5 +1,33 @@
 # CushLabs Scrollytelling
 
+> Telling a prospect the work is good is weak. Showing them what it looks like,
+> scrolling, is not.
+
+## The problem it solves
+
+Technical work is hard to sell because the buyer cannot see it.
+
+- A list of capabilities on a services page reads the same from every vendor.
+- Screenshots do not convey how something behaves, and a case study is a wall of text a busy owner will not read.
+- The gap between "sounds competent" and "obviously competent" is where deals are lost.
+
+## What it does for the business
+
+- Turns a piece of work into something a prospect scrolls through and understands without effort.
+- Gives the sales conversation an artefact to point at.
+- Doubles as proof of front-end craft, which is itself part of what is being bought.
+
+## Who it's for
+
+- **Prospects** who need to see the work, not read about it.
+- **CushLabs**, as sales collateral that also demonstrates the skill it describes.
+
+---
+
+# Technical reference
+
+Everything below is implementation detail. The business case is above.
+
 ![Astro](https://img.shields.io/badge/Astro-5-BC52EE?logo=astro&logoColor=white)
 ![Svelte](https://img.shields.io/badge/Svelte-5-FF3E00?logo=svelte&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss&logoColor=white)
