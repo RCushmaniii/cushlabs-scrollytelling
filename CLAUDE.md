@@ -1,5 +1,12 @@
 # CLAUDE.md — CushLabs Scrollytelling
 
+## Why this matters before you change anything
+
+The scroll-driven story pieces used to show prospects what the work looks like.
+
+**If this breaks:** Sales collateral breaks in front of a prospect. It is public and attributable, and a broken showcase of front-end craft argues against the thing it is meant to prove.
+
+Its risk class and revenue proximity are recorded in `operating-system/portfolio/repo-metadata.json`, and are read from there rather than restated here -- the same rule that governs prices, client facts and platform approvals.
 ## Project Overview
 
 Production-grade scrollytelling template for cinematic, bilingual pitch decks. Built with Astro 5 + Svelte 5 + Tailwind CSS 3 + MDX. Supports dual-mode interaction: Presentation Mode (scroll-locked, auto-narrated) and Browse Freely (normal scrolling). All configuration driven from `scrollytelling.config.ts`.
