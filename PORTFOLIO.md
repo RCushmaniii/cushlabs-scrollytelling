@@ -3,6 +3,7 @@
 portfolio_enabled: true
 portfolio_priority: 8
 portfolio_featured: false
+portfolio_last_reviewed: "2026-09-13"
 
 # === CARD DISPLAY ===
 title: "CushLabs Scrollytelling"
